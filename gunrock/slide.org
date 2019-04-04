@@ -84,10 +84,18 @@
 
  上位にあたる Intent Classifier はユーザの3段階のプロセスで対話意図を分類します。１段階目は例えば "Play music" や "set the temparature" といったAlexaへの命令のようなものです。これに関してはAlexaの機能（音楽をかけるとか）を起動するように促します。２段階目は話題のカテゴリを特定することで、NLUから得られる付加情報（一部後述しますが、Google Knowledge GraphやMicrosoft Concept Graph、Amazon Alexa Prize Topic Classifier なんかから得られるカテゴリ情報です）を元に分類を行います。３段階目は lexical intents と名付けられたもので、ユーザが Gunrock に向かって好みや意見について質問しているのかどうかなど、ユーザの要求を分析するためのものです。これには正規表現を用いたようです。
  
- 上位で処理されたものは、更に Dialog Module Selector (図には書かれていないですが、Intent Classifier -> Topic Dialog Modules の部分にあると思ってください。)で Topic dialog Module の分類が行われます。ここで行われていることは、Intent Classifierで行われた情報と、それまでの対話履歴を元に、どの Topic Dialog Module でそのユーザからの発話が処理されるべきかを最終的に決定することで、たとえば対話履歴からその話題について話されることがないとわかっているならば（例えば``話題を変えましょう”と事前に言われていたときなど）はもしその話題に行くべきだと前の部分が言っていたとしてもそれを受け付けず、別の Topic Dialog Module に行くなどします。
+ 上位で処理されたものは、更に Dialog Module Selector (図には書かれていないですが、Intent Classifier -> Topic Dialog Modules の部分にあると思ってください。)で Topic dialog Module の分類が行われます。ここで行われていることは、Intent Classifierで行われた情報と、それまでの対話履歴を元に、どの Topic Dialog Module でそのユーザからの発話が処理されるべきかを最終的に決定することで、たとえば対話履歴からその話題について話されることがないとわかっているならば（例えば``話題を変えましょう”と事前に言われていたときなど）はもしその話題に行くべきだと前の部分が言っていたとしてもそれを受け付けず別の Topic Dialog Module に行き、その話題について話されなければならない場合（その話題の途中など）には直ちにその Topic Dialog Module へ行きます。
  
- 下位で処理されるものは、
+ 下位で処理されるものは、それぞれの Topic Dialog Module に、とそれ以外の一般的な受け答えなどについてです。Topic Dialog Module はいくつかの話題についての対話フローが設計されており（つまりこれはかなり手打ちに設計されているということです。）、例えば Animal Module では動物についての話題を処理するためのフローが書かれていることになります。一般な受け答えなど、とは例えば ``how old is Lebron James" といった一般常識のような質問に答えるためのものと、``how old are you" といった bot への質問の２つに大別されます。前者には EVI と呼ばれる Amazon から提供されるサービス、後者には Universal Sentence Encoder いう文埋め込みの（つまり文をベクトル化する）モデルを用いて処理しています。
  
+ ここは完全に余談ですが、この下位の対話フロー部、相当に苦労したのかゴリゴリと内容が書かれています。しかしこれに関しては新規性、というよりかはシステム上必要だった部分として捉えるしかないような気がしています。勿論調査を元に頑張ってフロー設計を行ったことはわかるんですが、この手のものは比較が難しそうだなぁというイメージですね。報われない・・・
+ 
+ さてここで Dialog Management へ向かう直線のもとである、Knowledge Base (知識ベース) について触れておきましょう。こいつは Reddit や Twitter Moment などから逐次的に得られるデータを knowledge graph へ統合していくシステムになっています。つまり情報源から得られる情報の関係性を調べそれをつなぎ合わせてデータベースに``自動的に''統合していくことになります。（これ、サラッと書かれていますが人間の記憶みたいなことをやっているので地味にすごいなぁと個人的に思っています。）この部分についても後でもう少し詳しく触れたいと思います。
+
+ Dialog Manager を通りまして次に行くのは Natural Language Generation （NLG）です。ここでは主にDialog Manager で得られた応答に関する情報を用いて、実際の応答のテキスト、そしてその音声を生成します。
+ 
+ 
+
 * Gunrock の内部システムを深く見てみる (1)
   
  まず Segmentation です。ここでは入力をうまい感じに意味的に分割します。ちょっと難しいので例を出しましょう。例えば入力に、``alexa that is cool what do you think of the avengers''(かっこいいアレクサ、アヴェンジャーズについてどう思ってる？) という入力文があったとします。すると分割記号 <BRK> を用いて、``alexa <BRK> that is cool <BRK> what do you think of the avengers'' という風になります。これを行うために Gunrock は深層学習モデル (Seq2Seq モデル) と入力の音声データにおける空白時間(alexa || that is cool || what do you think of the avengers の ``||" の空白時間に注目したようです)を用いた検出機構を組み合わせました。
