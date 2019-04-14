@@ -12,7 +12,7 @@
 #+creator: Emacs 25.2.2 (Org mode 9.2.2)
 
 * 導入
-  この記事は Amazon Alexa Prize 2018 年度最優秀賞を獲得した Gunrock の論文を元に作成しています。    
+  この記事は Amazon Alexa Prize 2018 年度最優秀賞を獲得した Gunrock(https://s3.amazonaws.com/dex-microsites-prod/alexaprize/2018/papers/Gunrock.pdf) の論文を元に作成しています。    
 
   他の論文では少し内容が異なっていることがありますが、最優秀賞を取ることができたということは恐らく最も出題を理解していたのだろうということでこちらを参考にしました。    
 
@@ -26,7 +26,7 @@
 
   Gunrock が特に取り組んだ問題は、以下の3つとなります。    
 
-  1. オープンドメインの音声言語理解を処理するための3層音声言語理解パイプラインの提案
+  1. オープンドメインの音声言語理解を処理す五等分の花嫁るための3層音声言語理解パイプラインの提案
   2. 対話の文脈情報を利用して 一般の事実 と botの意見 をシームレスに切り替えていく柔軟な対話フローを可能にする階層的な対話管理システムの設計
   3. トーン調整や休符挿入を行うことでより自然な応答発話を構築する韻律音声合成機構の作成
 
@@ -34,7 +34,7 @@
 
   ・・・とりあえずこのコンテストについてもう少しだけ触れてみましょう。
 * Amazon Alexa Prize 2018 とは何だったのか
-  Amazon Alexa Prize は Amazon Alexa の内部システムを作るコンテストです。このコンテストには毎年テーマが設けられ、今年のテーマは 「Social bot」なるものの作成でした。Social bot とは所謂雑談対話のできる bot (chatbot などと呼ばれていますが、日本の蔑称的な意味合いはないです）と Microsoft Cortana のようなユーザの動作補助をする Personal Assistant の中間にあるような対話システムです。具体的には以下の図 (sounding board のスライド(https://sounding-board.github.io/index_files/Ostendorf_naacl2018.pdf)より)を参照してください。
+  Amazon Alexa Prize は Amazon Alexa の内部システムを作るコンテストです。このコンテストには毎年テーマが設けられ、今年のテーマは 「Social bot」なるものの作成でした。Social bot とは所謂雑談対話のできる bot (chatbot などと呼ばれていますが、日本の蔑称的な意味合いはないです）と Microsoft Cortana のようなユーザの動作補助をする Personal Assistant の中間にあるような対話システムです。具体的には以下の図 (sounding board のスライド(https://sounding-board.github.io/index_files/Ostendorf_naacl2018.pdf) より)を参照してください。
 
   いまいち Social Conversation の意味に掴みかねる部分があるかもしれませんが、簡単にいうと世間話です。またこの世間話というのがかなり難しい問題で、カタカナで格好良く言うならば、オープンドメインな対話、ということになり、つまりほとんど至るところの話題に対応できる雑談対話システムということになります。
   
@@ -85,7 +85,7 @@
 
  上位にあたる Intent Classifier はユーザの3段階のプロセスで対話意図を分類します。１段階目は例えば "Play music" や "set the temparature" といったAlexaへの命令のようなものです。これに関してはAlexaの機能（音楽をかけるとか）を起動するように促します。２段階目は話題のカテゴリを特定することで、NLUから得られる付加情報（一部後述しますが、Google Knowledge GraphやMicrosoft Concept Graph、Amazon Alexa Prize Topic Classifier なんかから得られるカテゴリ情報です）を元にカテゴリ分類を行います。３段階目は lexical intents と名付けられたもので、ユーザが Gunrock に向かってある対象の好みや意見について質問しているのかどうかなど、ユーザの要求を分析するためのものです。これには正規表現を用いたようです。
  
- 上位で処理されたものは、更に Dialog Module Selector (図には書かれていないですが、Intent Classifier -> Topic Dialog Modules の部分にあると思ってください。)で Topic dialog Module への分類が行われます。ここで行われていることは、Intent Classifierで行われた情報と、それまでの対話履歴を元に、どの Topic Dialog Module でそのユーザからの発話が処理されるべきかを最終的に決定することで、たとえば対話履歴からその話題について話されることがないとわかっているならば（例えば``話題を変えましょう”と事前に言われていたときなど）はもしその話題に行くべきだと前の部分が言っていたとしてもそれを受け付けず別の Topic Dialog Module に行き、その話題について話されなければならない場合（その話題の途中など）には直ちにその Topic Dialog Module へ行きます。
+ 上位で処理されたものは、更に Dialog Module Selector (図には書かれていないですが、Intent Classifier -> Topic Dialog Modules の部分にあると思ってください。)で Topic dialog Module への分類が行われます。ここで行われていることは、Intent Classifierで行われた情報と、それまでの対話履歴を元に、どの Topic Dialog Module でそのユーザからの発話が処理されるべきかを最終的に決定することです。たとえば対話履歴からその話題について話されることがないとわかっているならば（例えば``話題を変えましょう”と事前に言われていたときなど）はもしその話題に行くべきだと前の部分が言っていたとしてもそれを受け付けず別の Topic Dialog Module に行きます。同様にその話題について話されなければならない場合（その話題の途中など）には直ちにその Topic Dialog Module へ行きます。
  
  下位で処理されるものは、それぞれの Topic Dialog Module とそれ以外の一般的な受け答えなどについてです。Topic Dialog Module はいくつかの話題についての対話フローが設計されており（つまりこれはかなり手打ちに設計されているということです。）、例えば Animal Module では動物についての話題を処理するためのフローが書かれていることになります。一般な受け答えなど、とは例えば ``how old is Lebron James" といった一般常識のような質問に答えるためのものと、``how old are you" といった bot への質問の２つに大別されます。前者には EVI と呼ばれる Amazon から提供されるサービス、後者には Universal Sentence Encoder いう文埋め込みの（つまり文をベクトル化する）モデルを用いて処理しています（Backstory と呼ばれる部分。独自のシステムらしいです）。
  
@@ -98,7 +98,7 @@
  Prosody Synthesis はAmazon SSML format と呼ばれる形式に従ってテキストを音声に変換する処理を行う（これにより番号なんかをうまく読み上げられるようになります）他、独自の機能として、"uh..." といったつなぎの言葉を付け加えることで、より人間的な応答を生成します。また長い文に関しては意図的に文を区切ることで、自然に聞こえるようにしたようです。そしてここがGunrockが特に取り組んだ問題の３つ目になります。
  
  最後に生成された応答の音声をAlexaから出力することで我々ユーザは応答を聞くことになる、ということになります。
- 
+
 * Gunrock の内部システムを深く見てみる (1)
   
   さて、ここでは NLU (Natural Language Understanding)　の概要をざっくり説明します。
