@@ -77,7 +77,7 @@
   waveform から coder を流れていき、feature、特徴量を獲得し、そこから voder を流れることで元の waveform を得る、これがこのモデルの流れになります。
   
   順番に見ていきましょう。
-   
+   1
 ** Coder と Voder
    - Coder    
 
@@ -99,12 +99,15 @@
      自然言語処理畑育ちのせいか、私には Upsampling というのは初見でしたが、幸いわかりやすい記事、[DeepLearning でアップサンプリングする](https://catindog.hatenablog.com/entry/2018/03/24/164029) がありました。Deconvolution (= Transposed Convolution） と似たような機能だと思うんですが、入れ替えると性能にどう影響するのかがちょっと気になります。
      
      また \mu -law については大学の授業でちらっと触れていたような記憶がありますが、確か音声のサンプルされた値を対数的に圧縮することで人間的な音質の低下を抑えながらデータを圧縮することができる、というような技術のはずです。元データは恐らく [データサイズが大きいPCM](http://www.asahi-net.or.jp/~cv9t-sum/knowledge40.htm#G.711%E3%80%80%CE%BC%E5%89%87%E3%80%80%EF%BC%88%CE%BC-law%EF%BC%89) だと思われるので、この圧縮でデータ・学習のコストを下げているのかなとも思っています。
-
      
 ** Sampling Method
+   LPCNet と FFTNet の論文では、出力分布から直接データをサンプリングすると過度のノイズが発生してしまうことがあると報告されています。この問題への対処として、FFTNet は有声音を強調する手法を提案しました。LPCNet では２値化判定をピッチ相関 (pitch correlation) に置き換えました。ピッチ相関 (pitch correlation) は、出力 logit を継続的にスケーリングするために利用されます。
    
-** Noise injection
+   本実験では、multinomial sampling, 条件付きサンプリング(conditional sampling), そして LPCNet のピッチ相関をベースとしたサンプリング、そして単純な argmax を用いたサンプリングを行い比較を行っています。しかし結局のところ argmax を用いた手法が最もクリアな音声を生成することが出来たようです。(この結果は WaveNet でも同様な結果が報告されているようです。)
 
+   ピッチ相関ってなんですかねっていう顔をしています。LPCNet の論文はこの後読む予定なので、きっとそこで明らかになることを期待しています…。それとこれはピッチ相関、という訳であっているんでしょうか？調べてもまるで出てこないので恐らく違うような気がしています。
+** Noise injection
+   
 ** Post-synthesis denoising
 
 
