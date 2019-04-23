@@ -1,0 +1,19 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
+#+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+options: tasks:t tex:t timestamp:t title:t toc:t todo:t |:t
+#+title: 畳み込みな機械翻訳手法、Pervasive attention を読む
+#+date: <2019-04-24 Wed>
+#+author: MokkeMeguru
+#+email: meguru.mokke@gmail.com
+#+language: ja
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 25.2.2 (Org mode 9.2.2)
+* 機械翻訳って何？
+  機械翻訳というのはある自然言語（英語とか）からある別な言語（ドイツ語）へ **翻訳** を行う、 **自然言語処理の中の一タスク** です。こいつができると Google 翻訳 みたいなことができるようになります。
+* 機械翻訳の関連研究って何？CNN で機械翻訳？
+  古くは単語ごとの辞書とか手打ちの文法ルール何かを使ってやっていたようですが、最近これに強いのが **深層学習** を用いた機械翻訳です。多分現在の Google 翻訳もこの分野の知見を使っているはずです。
+  ところで Google の研究所が出した最もこの界隈で有名な機械翻訳手法として、Sequence to Sequence という手法を挙げることが出来ます。これは encoder-decoder network 型、という形で構成されており、ざっくり言うと encoder で入力文を処理して、何らかのベクトル（中間表現）を得て、それを用いて decoder から出力文を生成する、というものです。このSequence to Sequence な機械翻訳では、encoder, decoder に RNN を用いられることが多く、これを様々な形 (lstm, glu, bidirectional rnn など) に変形して性能を向上させることが多く研究されていました。
+  それはさておき、最近では自然言語処理に画像認識分野で広く使われている **Convolutional Network** を使っていこうという流れがあります。例えばそれは単語を表すベクトルを重ねて行列のようにみなし、それを１次元畳み込みかける手法なんかが有名です。話を戻して機械翻訳ですが、例えば encoder のみに CNN を、decoder に RNN を用いた研究、どちらにもCNNを活用した研究もありました。このようなCNNを元にしたモデルは、RNNのように時系列的な接続がセルのつながりで表現されているわけではなく、Convolution の機能として処理されるという点で大きく異なります。
+  Attention Mechanisms は encoder と decoder をつなぐ部分に用いられる手法として提案されました。
