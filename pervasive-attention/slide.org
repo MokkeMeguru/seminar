@@ -11,9 +11,11 @@
 #+exclude_tags: noexport
 #+creator: Emacs 25.2.2 (Org mode 9.2.2)
 * 導入
-  [[https://www.aclweb.org/anthology/K18-1010][Pervasive Attention]] というのは 2018 年 11 月に CoNLL (Conference on Computational Natural Language Learning) に掲載された機械翻訳に関する論文です。個人的なこいつの凄いところは Convolutional Neural Network を用いた機械翻訳手法で当時の機械翻訳のSOTAに食い込んだという点だと思っています。ある意味では、Transformer が Attention Is All You Need (後述するAttention機構に注視したモデルであるという意味)とされるならば、Pervasive Attention は CNN Is All You Need とも言えるようなモデルです。
+  [[https://www.aclweb.org/anthology/K18-1010][Pervasive Attention]][1] というのは 2018 年 11 月に CoNLL (Conference on Computational Natural Language Learning) に掲載された機械翻訳に関する論文です。個人的なこいつの凄いところは Convolutional Neural Network を用いた機械翻訳手法で当時の機械翻訳のSOTAに食い込んだという点だと思っています。ある意味では、Transformer が Attention Is All You Need (後述するAttention機構に注視したモデルであるという意味)とされるならば、Pervasive Attention は CNN Is All You Need とも言えるようなモデルです。
   
   Transformerで沸き返っている界隈からすればやや日陰者感がありますが、それでも大変趣深い論文なので読んでみることにし、ついでに紹介ができればということで記事にしました。
+
+  [1]: Pervasive Attention (Maha Elbayad, Laurent Besacier, Jakob Verbeek)
 * 機械翻訳って何？
   機械翻訳というのはある自然言語（英語とか）からある別な言語（ドイツ語）へ **翻訳** を行う、 **自然言語処理の中の一タスク** です。こいつができると **Google 翻訳** みたいなことができるようになります。
 
@@ -27,28 +29,29 @@
    [[./img/seq2seq_arch.png]]
 
 
-   これに対して改良策として RNN セルを LSTM/GLU/BiRNN/BiLSTM セルに置き換えたり、Attention機構 (Encoder の途中の情報を Decoder に直接的に反映させていく考え方、詳細は [Luong et al. 2015][1]) を加える考え方などが提案されています。
+   これに対して改良策として RNN セルを LSTM/GLU/BiRNN/BiLSTM セルに置き換えたり、Attention機構 (Encoder の途中の情報を Decoder に直接的に反映させていく考え方、詳細は Luong Attention [3]) を加える考え方などが提案されています。
 
-[1]: Effective approaches to attention-based neural machine translation. (Luong, H. Pham, and C. Manning. 2015.)
 [2]: Sequence to Sequence Learning with Neural Networks (Ilya Sutskever, Oriol Vinyals, Quoc V. Le)
+[3]: Effective approaches to attention-based neural machine translation. (Luong, H. Pham, and C. Manning. 2015.)
+
 
 ** CNN を用いた手法
    脚光を浴びていたRNNを用いた手法ですが、訓練時間的な問題があったりするため、CNNで代替できないかという話が持ち上がっています。
 
    もう少し理論的な話をすると、RNNやLSTMは時間的に並行に学習することが構造上難しいのに対して、CNNは並列に計算することが可能な点がこの考えのモチベーションの一つになっています。またAttention機構がCNNの構造的に最初から含まれているという点も挙げられます。(まとめて畳み込んで出力しているので、実質Attention、みたいなことらしいです。尚、他のCNNを用いた関連手法すべてにこれが適応されるかは…謎です)
 
-   関連手法として有名なものを挙げるとすると、Convolutional Sequence to Sequence Learning[3] が挙げられます。これは Facebook の研究者が出したペーパーです。詳しい説明については複雑なので省略しますが、この [[http://deeplearning.hatenablog.com/entry/convs2s][論文解説]] はとてもわかり易く解説しているので興味があれば是非ご一読ください。
+   関連手法として有名なものを挙げるとすると、ConvS2S[4] が挙げられます。これは Facebook の研究者が出したペーパーです。詳しい説明については複雑なので省略しますが、この [[http://deeplearning.hatenablog.com/entry/convs2s][論文解説]] はとてもわかり易く解説しているので興味があれば是非ご一読ください。
    
-   [3]: Convolutional Sequence to Sequence Learning. Jonas Gehring, Michael Auli, David Grangier, Denis Yarats, Yann N. Dauphin
+   [4]: Convolutional Sequence to Sequence Learning (Jonas Gehring, Michael Auli, David Grangier, Denis Yarats, Yann N. Dauphin)
 
 ** その他(Attention is all you need)
-   その他の例としては上の２つと大きく異なる構造を持った Transformer というモデルが有名です。Attention is all you need[4] という論文で提案されたモデルで、昨今の自然言語処理のスイスナイフばりの立ち位置を確立しています。(どこかのツイッタラーさんが、自然言語処理を始めるならMeCabなんぞ捨ててまずBERT[5] をやってみろ！みたいなことをツイートしていましたが、このBERTのベースとなる手法です。)
+   その他の例としては上の２つと大きく異なる構造を持った Transformer というモデルが有名です。Attention is all you need[5] という論文で提案されたモデルで、昨今の自然言語処理のスイスナイフばりの立ち位置を確立しています。(どこかのツイッタラーさんが、自然言語処理を始めるならMeCabなんぞ捨ててまずBERT[6] をやってみろ！みたいなことをツイートしていましたが、このBERTのベースとなる手法です。)
    
    この特徴としては、一般的な(昔からある)機械翻訳の手法 でちらっと触れた Attention機構を注視してRNNの機構を取り去ったようなモデル、ということになっています(少なくとも界隈ではそう言われています)。この解説としては [[https://jalammar.github.io/illustrated-transformer/][The Illustrated Transformer]] のページを見ると良いです。(英語の記事に対して中国語、韓国語の翻訳はあるのに日本語の翻訳がないところが、この国の技術力って感じで趣がありますね)
    
    
-   [4]: Attention Is All You Need. Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin
-   [5]: BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova
+   [5]: Attention Is All You Need (Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin)
+   [6]: BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding (Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova)
 
 * どのくらいの性能が出来たの？
   #+CAPTION: Pervasive Attention :  Table 3
@@ -73,15 +76,45 @@
 
 * この構造はどんな形をしているの？
   さてそれでは簡単にモデルの概要図を説明していきましょう。
-
-  まず入力文と出力文を畳み込みできる形にしてみましょう。以下の図を見てください。大体こんな感じで入力文と出力文を畳み込み可能な形(つまりTensor)に構成しています。なんとなく入力と出力がクロスしていること、コピーをして行列サイズを合わせていることが想像できれば良いと思います。
+** 入力データ
+  まず入力文と出力文を畳み込みできる形にしてみましょう。以下の図を見てください。大体こんな感じで入力文と出力文を畳み込み可能な形(つまりTensor)に構成しています。なんとなく入力と出力がクロスしていること、コピーをして行列サイズを合わせていること、入力文のTensorと出力文のTensorが Embedding Depth 軸に結合されていることが想像できれば良いと思います。
   
   #+CAPTION: Pervasive Attention :  Figure 5
   #+ATTR_LATEX: :width 500%
   [[./img/input_architecture.png]]
-
-
   
   
+** DenseNet'
+    Pervasive Attention は先述の Tensor に対して **特殊なフィルターを持った DenseNet** を通します。
+   
+  まずDenseNet[7] について説明すると、これは画像分類のタスクに提案されたネットワークです。基本単位はDense Block と呼ばれる BN->ReLU->Conv->BN->ReLU->Conv->Dropout の層で、まずこれを複数直列に繋ぎます。次に、前のBlockから次の次の Block へ手を伸ばす、というようなことを行い、複数の以前のBlockの結果を現在の層に接続します。これによって、前の層で落ちてしまった情報も読み取ることができるという利点があります。
+
+  具体的な図としては、DenseNet の以下の図がわかりやすいでしょう。入力から前の方へ向かっていくつかの線が途中の層を跨いで伸びていることがグラフィカルに解ると思います。
+  
+  
+  #+CAPTION: Densely Connected Convolutional Networks : Figure 1
+  #+ATTR_LATEX: :width 500%
+  [[./img/dense_arch.PNG]]
+  
+  DenseNet についてなんとなくイメージがつかめたところで、本題の **特殊な** という部分について触れていきます。端的に言うならば、特殊性が指すものは **畳み込み** の部分です。
+
+  まず入力の概要図を示した図、Input Tensorの部分をもう一度参照してください。これを見ると、恐らく上から見ると、入力文と出力文が丁度 x 軸と y 軸に沿うような形で並んでいる様を想像することができると思います。その様を用いてこの畳込みの特殊性は説明できます。
+
+  
+  #+CAPTION: Pervasive Attention : Figure 1
+  #+ATTR_LATEX: :width 500%
+  [[./img/special_conv.PNG]]
+  
+  これが丁度 Input Tensor を上から見て畳み込みの概形を示したものです。青い部分と灰色の部分があることが解ると思います。Target sequence 方向に見て、後の方が灰色になっていることが解ると思います。つまり出力文の後の方を参照しないようにしたいと言う意図が見えると思います。やや飛躍したことを言えば、後の方を参照しないということは実質RNNのような、次の単語を予測する、という機能を見込むことができるわけです(ちなみに Transformer も似たような隠す処理を行っています)。Pervasive Attentionでは、DenseNetの一部にこの畳込み手法を用いています。
+
+** 予測 
+   出力文の予測には少し特殊な手続きを踏んでいます。すべてを説明するのは少し長すぎるので、一部を省略して簡潔に紹介します。
+   
+   
+
+    
+  
+  [7]: Densely Connected Convolutional Networks. Gao Huang, Zhuang Liu, Laurens van der Maaten, Kilian Q. Weinberger
+
 * 結論とか読んだ感想とか
   
