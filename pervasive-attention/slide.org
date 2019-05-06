@@ -46,10 +46,6 @@
    [4]: Attention Is All You Need. Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin
    [5]: BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova
 
-  古くは単語ごとの辞書とか手打ちの文法ルール何かを使ってやっていたようですが、最近これに強いのが **深層学習** を用いた機械翻訳です。多分現在の Google 翻訳もこの分野の知見を使っているはずです。
-
-  
-  
 * どのくらいの性能が出来たの？
   
 * この構造はどんな形をしているの？
