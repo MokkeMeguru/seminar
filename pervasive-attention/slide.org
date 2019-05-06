@@ -18,7 +18,7 @@
 
 ** 一般的な(昔からある)機械翻訳の手法 (RNN を用いた encoder-decoder モデル)
    恐らくこの分野の研究で一番ベーシックなものとして考えて良いのがこの形のモデルでしょう。これは RNN(Reccurent Neural Network) を用いた、AutoEncoderのようなモデルです。以下の概略図を見てください。EncodeとDecoder というブロックが latent vector というベクトルで繋げられていることがわかると思います。Encoder は入力文を単位ごと（例えば単語ごと）に RNN セルに通すことを次々に繰り返します。Decoder は先頭を示す記号(<s>)を頭につけた出力文を単位ごとに RNN セルに通すことを次々に繰り返します。そして Decoder の RNN セルからの出力が期待する翻訳文となります。
-   これに対して改良策として RNN セルを LSTM/GLU/BiRNN/BiLSTM セルに置き換えたり、Attention機構 (Encoder の途中の情報を Decoder に直接的に反映させていく考え方、詳細は [Luong et al. 2015][1])
+   これに対して改良策として RNN セルを LSTM/GLU/BiRNN/BiLSTM セルに置き換えたり、Attention機構 (Encoder の途中の情報を Decoder に直接的に反映させていく考え方、詳細は [Luong et al. 2015][1]) を加える考え方などが提案されています。
 
 [1]:. Effective approaches to attention-based neural machine translation. (Luong, H. Pham, and C. Manning. 2015.)
 ** CNN を用いた手法
