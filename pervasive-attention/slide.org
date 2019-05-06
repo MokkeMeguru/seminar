@@ -18,6 +18,11 @@
 
 ** 一般的な(昔からある)機械翻訳の手法 (RNN を用いた encoder-decoder モデル)
    恐らくこの分野の研究で一番ベーシックなものとして考えて良いのがこの形のモデルでしょう。これは RNN(Reccurent Neural Network) を用いた、AutoEncoderのようなモデルです。以下の概略図を見てください。EncodeとDecoder というブロックが latent vector というベクトルで繋げられていることがわかると思います。Encoder は入力文を単位ごと（例えば単語ごと）に RNN セルに通すことを次々に繰り返します。Decoder は先頭を示す記号(<s>)を頭につけた出力文を単位ごとに RNN セルに通すことを次々に繰り返します。そして Decoder の RNN セルからの出力が期待する翻訳文となります。
+
+   #+ATTR_LATEX: 500%
+   [[./img/seq2seq_arch.png]]
+
+
    これに対して改良策として RNN セルを LSTM/GLU/BiRNN/BiLSTM セルに置き換えたり、Attention機構 (Encoder の途中の情報を Decoder に直接的に反映させていく考え方、詳細は [Luong et al. 2015][1]) を加える考え方などが提案されています。
 
 [1]:. Effective approaches to attention-based neural machine translation. (Luong, H. Pham, and C. Manning. 2015.)
@@ -27,7 +32,7 @@
     
   古くは単語ごとの辞書とか手打ちの文法ルール何かを使ってやっていたようですが、最近これに強いのが **深層学習** を用いた機械翻訳です。多分現在の Google 翻訳もこの分野の知見を使っているはずです。
 
-  この Google の研究所が出した最もこの界隈で有名な機械翻訳手法として、Sequence to Sequence という手法を挙げることが出来ます。これは encoder-decoder network 型、という形で構成されており、ざっくり言うと encoder で入力文を処理して、何らかのベクトル（中間表現）を得て、それを用いて decoder から出力文を生成する、というものです。このSequence to Sequence な機械翻訳では、encoder, decoder に RNN を用いられることが多く、これを様々な形 (lstm, glu, bidirectional rnn など) に変形して性能を向上させることが多く研究されていました。
+  この Google の研究所が出した最もこの界隈で有名な機械翻訳手法として、Sequence to Sequence という手法を挙げることが出来ます。これは encoder-decoder network 型、という形で構成されており、ざっくり言うと encoder で入力文を処理して、何らかのベクトル（中間表現）を得て、それを用いて decoder から出力文を生成する、というものです。このSequence to Sequence な機械翻訳では、encoder, decoder に RNN を用いられること\(\{y_1, y_2, \dots, y_{|t|} \}\) means an input sentence. が多く、これを様々な形 (lstm, glu, bidirectional rnn など) に変形して性能を向上させることが多く研究されていました。
 
   それはさておき、最近では自然言語処理に画像認識分野で広く使われている **Convolutional Network** を使っていこうという流れがあります。例えばそれは単語を表すベクトルを重ねて行列のようにみなし、それを１次元畳み込みかける手法なんかが有名です。話を戻して機械翻訳ですが、例えば encoder のみに CNN を、decoder に RNN を用いた研究、どちらにもCNNを活用した研究があります。このようなCNNを元にしたモデルは、RNNのように時系列的な接続がセルのつながりで表現されているわけではなく、Convolution の機能として処理されるという点で大きく異なります。
 
