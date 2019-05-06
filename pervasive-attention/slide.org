@@ -17,7 +17,7 @@
   かつては辞書を用いた機械翻訳などがありましたが、最近では深層学習を用いたものが有力になっています。というわけで今回は深層学習の、特に論文中に取り上げられているものを、以下の３つの観点から眺めてみます。
 
 ** 一般的な(昔からある)機械翻訳の手法 (RNN を用いた encoder-decoder モデル)
-   恐らくこの分野の研究で一番ベーシックなものとして考えて良いのがこの形のモデルでしょう。これは RNN(Reccurent Neural Network) を用いた、AutoEncoderのようなモデルです。以下の概略図を見てください。EncodeとDecoder というブロックが latent vector というベクトルで繋げられていることがわかると思います。Encoder は入力文を単位ごと（例えば単語ごと）に RNN セルに通すことを次々に繰り返します。Decoder は先頭を示す記号(<s>)を頭につけた出力文を単位ごとに RNN セルに通すことを次々に繰り返します。そして Decoder の RNN セルからの出力が期待する翻訳文となります。
+   恐らくこの分野の研究で一番ベーシックなものとして考えて良いのがこの形のモデルでしょう。これは RNN(Reccurent Neural Network) を用いた、AutoEncoderのようなモデルです。以下の概略図を見てください。EncodeとDecoder というブロックが latent vector というベクトルで繋げられていることがわかると思います。Encoder は入力文を単位ごと（例えば単語ごと）に RNN セルに通すことを次々に繰り返します。Decoder は先頭を示す記号(<s>)を頭につけた出力文を単位ごとに RNN セルに通すことを次々に繰り返します。そして Decoder の RNN セルからの出力が期待する翻訳文となります。機械翻訳に対して最も影響力のあったモデルはこの形の、Googleの研究者らが発表した Sequence to Sequence[2] というモデルであり、こいつは Seq2Seq という略称で親しまれています。
 
    #+ATTR_LATEX: 500%
    [[./img/seq2seq_arch.png]]
@@ -25,18 +25,31 @@
 
    これに対して改良策として RNN セルを LSTM/GLU/BiRNN/BiLSTM セルに置き換えたり、Attention機構 (Encoder の途中の情報を Decoder に直接的に反映させていく考え方、詳細は [Luong et al. 2015][1]) を加える考え方などが提案されています。
 
-[1]:. Effective approaches to attention-based neural machine translation. (Luong, H. Pham, and C. Manning. 2015.)
+[1]: Effective approaches to attention-based neural machine translation. (Luong, H. Pham, and C. Manning. 2015.)
+[2]: Sequence to Sequence Learning with Neural Networks (Ilya Sutskever, Oriol Vinyals, Quoc V. Le)
+
 ** CNN を用いた手法
+   脚光を浴びていたRNNを用いた手法ですが、訓練時間的な問題があったりするため、CNNで代替できないかという話が持ち上がっています。
+
+   もう少し理論的な話をすると、RNNやLSTMは時間的に並行に学習することが構造上難しいのに対して、CNNは並列に計算することが可能な点がこの考えのモチベーションの一つになっています。またAttention機構がCNNの構造的に最初から含まれているという点も挙げられます。(まとめて畳み込んで出力しているので、実質Attention、みたいなことらしいです。尚、他のCNNを用いた関連手法すべてにこれが適応されるかは…謎です)
+
+   関連手法として有名なものを挙げるとすると、Convolutional Sequence to Sequence Learning[3] が挙げられます。これは Facebook の研究者が出したペーパーです。詳しい説明については複雑なので省略しますが、この [[http://deeplearning.hatenablog.com/entry/convs2s][論文解説]] はとてもわかり易く解説しているので興味があれば是非ご一読ください。
    
+   [3]: Convolutional Sequence to Sequence Learning. Jonas Gehring, Michael Auli, David Grangier, Denis Yarats, Yann N. Dauphin
+
 ** その他(Attention is all you need)
-    
+   その他の例としては上の２つと大きく異なる構造を持った Transformer というモデルが有名です。Attention is all you need[4] という論文で提案されたモデルで、昨今の自然言語処理のスイスナイフばりの立ち位置を確立しています。(どこかのツイッタラーさんが、自然言語処理を始めるならMeCabなんぞ捨ててまずBERT[5] をやってみろ！みたいなことをツイートしていましたが、このBERTのベースとなる手法です。)
+   
+   この特徴としては、一般的な(昔からある)機械翻訳の手法 でちらっと触れた Attention機構を注視してRNNの機構を取り去ったようなモデル、ということになっています(少なくとも界隈ではそう言われています)。この解説としては [[https://jalammar.github.io/illustrated-transformer/][The Illustrated Transformer]] のページを見ると良いです。(英語の記事に対して中国語、韓国語の翻訳はあるのに日本語の翻訳がないところが、この国の技術力って感じで趣がありますね)
+   
+   
+   [4]: Attention Is All You Need. Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin
+   [5]: BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova
+
   古くは単語ごとの辞書とか手打ちの文法ルール何かを使ってやっていたようですが、最近これに強いのが **深層学習** を用いた機械翻訳です。多分現在の Google 翻訳もこの分野の知見を使っているはずです。
 
-  この Google の研究所が出した最もこの界隈で有名な機械翻訳手法として、Sequence to Sequence という手法を挙げることが出来ます。これは encoder-decoder network 型、という形で構成されており、ざっくり言うと encoder で入力文を処理して、何らかのベクトル（中間表現）を得て、それを用いて decoder から出力文を生成する、というものです。このSequence to Sequence な機械翻訳では、encoder, decoder に RNN を用いられること\(\{y_1, y_2, \dots, y_{|t|} \}\) means an input sentence. が多く、これを様々な形 (lstm, glu, bidirectional rnn など) に変形して性能を向上させることが多く研究されていました。
-
-  それはさておき、最近では自然言語処理に画像認識分野で広く使われている **Convolutional Network** を使っていこうという流れがあります。例えばそれは単語を表すベクトルを重ねて行列のようにみなし、それを１次元畳み込みかける手法なんかが有名です。話を戻して機械翻訳ですが、例えば encoder のみに CNN を、decoder に RNN を用いた研究、どちらにもCNNを活用した研究があります。このようなCNNを元にしたモデルは、RNNのように時系列的な接続がセルのつながりで表現されているわけではなく、Convolution の機能として処理されるという点で大きく異なります。
-
-  Attention Mechanisms は encoder と decoder をつなぐ部分に用いられる手法として提案されました。
+  
+  
 * どのくらいの性能が出来たの？
   
 * この構造はどんな形をしているの？
