@@ -10,6 +10,10 @@
 #+select_tags: export
 #+exclude_tags: noexport
 #+creator: Emacs 25.2.2 (Org mode 9.2.2)
+* 導入
+  [[https://www.aclweb.org/anthology/K18-1010][Pervasive Attention]] というのは 2018 年 11 月に CoNLL (Conference on Computational Natural Language Learning) に掲載された機械翻訳に関する論文です。個人的なこいつの凄いところは Convolutional Neural Network を用いた機械翻訳手法で当時の機械翻訳のSOTAに食い込んだという点だと思っています。ある意味では、Transformer が Attention Is All You Need (後述するAttention機構に注視したモデルであるという意味)とされるならば、Pervasive Attention は CNN Is All You Need とも言えるようなモデルです。
+  
+  Transformerで沸き返っている界隈からすればやや日陰者感がありますが、それでも大変趣深い論文なので読んでみることにし、ついでに紹介ができればということで記事にしました。
 * 機械翻訳って何？
   機械翻訳というのはある自然言語（英語とか）からある別な言語（ドイツ語）へ **翻訳** を行う、 **自然言語処理の中の一タスク** です。こいつができると **Google 翻訳** みたいなことができるようになります。
 
@@ -47,8 +51,37 @@
    [5]: BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova
 
 * どのくらいの性能が出来たの？
+  #+CAPTION: Pervasive Attention :  Table 3
+  #+ATTR_LATEX: :width 500%
+  [[./img/pa_results.PNG]]
+
+  大体のスコアはこんな感じになっています。De-En/En-Deというのは、BLEU評価で、簡単に言うと0-100の連続値を取る評価で高いほうが良いです。これを見る限り、Pervasive Attention は割とつよつよ、という感じになっています。また計算量 Flops を見ると、Transformerよりも少ないものの、全体的に見ると少し多いかな？という印象があります。しかしパラメータ数 prms を見ると、相当に抑えられていることがわかります。
+
+  つまり簡単にいうと、**そこそこの計算量・小さいパラメータ・つよつよのBLEUスコア** ということになります。
+
+  尚、Word-basedというのは文を単位に区切る際に単語ごとに区切るということ、BPE(byte-pair encoding)-based というのは（簡単に言うと）単語分割よりも語彙数を抑えられるように文を単位に分割していくことです。BPEの最近の発展としては、日本でやたら滅多に有名で有力な万能ツールと叫ばれている SentencePiece なんかがありますね。SentencePieceはあんまり詳しくないですが [[https://qiita.com/taku910/items/7e52f1e58d0ea6e7859c][Sentencepiece : ニューラル言語処理向けトークナイザ]] が最も信頼における記事だと思います。
+
+  しかしこの実験結果には少しだけ問題があります。それは用いたデータセットである IWSLT はそんなに大規模なモデル (参考までに紹介すると IWSLT は 200K サンプル /　WMT は 15.8M サンプル) とは言えないという点、多言語での実験結果がないため、別言語でどうなるかはなんとも言えないという点です。(日本語のこういったコーパスはやたら高い上に制約も強いので Fr-En あたりで実験してみたいものです)
   
+  また別の着眼点としては、入力文の長さに対してどのようなBLEUスコアがつくか、というものがあります。つまり短い文と長い文をこのモデルに突っ込んだらどのくらい精度の差がでるの？ということです。
+  
+  下の図を見てください。これを見ると、特に短い文に対して高い性能が出ていることがわかります。逆に長い文に対しては比較的に強くはないようです。
+  
+  #+CAPTION: Pervasive Attention :  Figure 5
+  #+ATTR_LATEX: :width 500%
+  [[./img/pa_bleu_len.PNG]]
+
 * この構造はどんな形をしているの？
+  さてそれでは簡単にモデルの概要図を説明していきましょう。
+
+  まず入力文と出力文を畳み込みできる形にしてみましょう。以下の図を見てください。大体こんな感じで入力文と出力文を畳み込み可能な形(つまりTensor)に構成しています。なんとなく入力と出力がクロスしていること、コピーをして行列サイズを合わせていることが想像できれば良いと思います。
+  
+  #+CAPTION: Pervasive Attention :  Figure 5
+  #+ATTR_LATEX: :width 500%
+  [[./img/input_architecture.png]]
+
+
+  
   
 * 結論とか読んだ感想とか
   
