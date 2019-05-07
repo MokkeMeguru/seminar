@@ -114,28 +114,28 @@
    
    さて、では DenseNetから出力されるTensorを想像してみましょう。Input Tensor のような四角い箱、見えましたね。この箱の軸は、Target Sequence の Time Step 軸、Copy(Input Sequence の Time Step)軸、そしてChannels と呼ばれる所謂埋め込みベクトルの高さの軸(Input Tensorの Embedding Depth に近い)の３軸で構成されています。
    
-   まずこれの軸の一つ、Copy 軸を潰します。どのように潰すのかと言うのは、以下の図を見てください。Max Pooling(論文中ではこう言ってますが、正しい表現か疑問です) と Self Attention を用いている、ということがなんとなくわかると思います。
+   まずこれの軸の一つ、 **Copy 軸** を潰します。どのように潰すのかと言うのは、以下の図を見てください。 **Max Pooling** (論文中ではこう言ってますが、正しい表現か疑問です) と **Self Attention** を用いている、ということがなんとなくわかると思います。
    
-   Max Pooling がややわかりにくいので実装を元に説明すると、これはCopy軸について \(1\times\1\times |s|\) のベクトルについて最大値を取る、という操作を Channel 軸方向に繰り返す操作です。もっと詳しい操作については、[[https://github.com/elbayadm/attn2d/blob/master/nmt/models/pooling.py#L14-L34][実装]] の方をみると良いと思います。
+   Max Pooling がややわかりにくいので実装を元に説明すると、これはCopy軸について \(1\times 1\times |s|\) のベクトルについて最大値を取る、という操作を Channel 軸方向に繰り返す操作です。もっと詳しい操作については、[[https://github.com/elbayadm/attn2d/blob/master/nmt/models/pooling.py#L14-L34][実装]] の方を見ると良いと思います。
 
   #+CAPTION: Pervasive Attention :  Output Vector
   #+ATTR_LATEX: :width 500%
   [[./img/output_tensor.png]]
    
-   
-   
-   
-   
-
-   
-   
-   
-   
-
-    
   
+  こうすることで得られた Output Vector ですが、これは厳密にはまだ出力される単位（単語）を表していません。これを出力の単位にするには、Output Vectorを 出力する語彙数の長さに伸ばしてあげて、それを確率分布の形に直す必要があります。
   
-
+  つまり以下の式を行います。尚、\(H_i \in \mathbb{R}^{|t|\times 2 f_L}\) は Output Vector で、\(E \in \mathbb{R}^{|\nu|}\times 2 f_L \ where\ \nu\ is\ output\ vocabulary\)  は変換の行列です。\(p_i \in \mathbb{R}^{|V|}\) が確率分布です。
+  
+  \(p_i = SoftMasx(EH_i)\)
+  
+  以上で出力単位（単語）が予測できるようになり、これが Target Sequence 方向に繰り返されると、出力文が得られるわけです。(実際出力文を生成するときは、一単位(単語)ずつ順番に生成していくようです。)
+  
 * 読んだ感想とか
-  この記事の終盤あたりで、恐らく[[https://arxiv.org/abs/1808.03867][改訂版]]が arxiv に上がっていたことに気が付き、なんとも言えない気持ちになりました。arxiv は論文の修正版が上がるので、論文を見るときはこっちを優先的に探したほうが良いのかもしれませんね。
+  CNN を用いた手法はこのようにパラメータ数が少なくてもうまく回るようなので、これを応用して言語モデルを考案すれば、BERTには及ばないものの軽量な言語モデルが出来そうですね。というのもBERTやGPT-2(OpenAI が開発している言語モデル、恐らくBERTと性能を競っている) はとてもパラメータ数が多く、でっかい計算機とでっかい資源でビッグにディープラーニングをしなければならないので、一般の研究者なんかはそうやすやすと争えないと思われ、小さくまとまるとかそういう方向で研究していくしかない気がしているためです。(日本の某大学なんかはGCEやAWSみたいな計算資源を使おうとすると会計が面倒ということで渋い顔をされるという話があったり…)
+
+  また DenseNet 部の改良にも面白そうなものがありそうですね。(多分無理ですが)最近出てきた [[https://arxiv.org/pdf/1806.06284.pdf][OctConv]] なんかと組み合わせるとよりパラメータ数が抑えられることも相まって高速に計算ができる＆性能が微上昇することが期待でいるかもしれません。
   
+  この記事を書く終盤あたりで、[[https://arxiv.org/abs/1808.03867][改訂版(?)]]が arxiv に上がっていたことに気が付き、なんとも言えない気持ちになりました。arxiv は論文の修正版が上がるので、論文を見るときはこっちを優先的に探したほうが良いのかもしれませんね。
+
+[8] Drop an Octave: Reducing Spatial Redundancy in Convolutional Neural Networks with Octave Convolution (Yunpeng Chen, Haoqi Fan, Bing Xu, Zhicheng Yan, Yannis Kalantidis, Marcus Rohrbach, Shuicheng Yan, Jiashi Feng)
