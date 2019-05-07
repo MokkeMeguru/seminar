@@ -53,12 +53,12 @@
    [5]: Attention Is All You Need (Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez, Lukasz Kaiser, Illia Polosukhin)
    [6]: BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding (Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova)
 
-* どのくらいの性能が出来たの？
+* どのくらいの性能が出たの？
   #+CAPTION: Pervasive Attention :  Table 3
   #+ATTR_LATEX: :width 500%
   [[./img/pa_results.PNG]]
 
-  大体のスコアはこんな感じになっています。De-En/En-Deというのは、BLEU評価で、簡単に言うと0-100の連続値を取る評価で高いほうが良いです。これを見る限り、Pervasive Attention は割とつよつよ、という感じになっています。また計算量 Flops を見ると、Transformerよりも少ないものの、全体的に見ると少し多いかな？という印象があります。しかしパラメータ数 prms を見ると、相当に抑えられていることがわかります。
+  大体のスコアはこんな感じになっています。De-En/En-Deというのは、BLEU評価で、簡単に言うと0-100の連続値を取る評価で高いほうが良いです。これを見る限り、Pervasive Attention は割とつよつよ、という感じになっています(但し後に出した改訂版(？)ではTransformerに若干性能で負けています)。また計算量 Flops を見ると、Transformerよりも少ないものの、全体的に見ると少し多いかな？という印象があります。しかしパラメータ数 prms を見ると、相当に抑えられていることがわかります。
 
   つまり簡単にいうと、**そこそこの計算量・小さいパラメータ・つよつよのBLEUスコア** ということになります。
 
@@ -70,7 +70,7 @@
   
   下の図を見てください。これを見ると、特に短い文に対して高い性能が出ていることがわかります。逆に長い文に対しては比較的に強くはないようです。
   
-  #+CAPTION: Pervasive Attention :  Figure 5
+  #+CAPTION: Pervasive Attention (改訂版):  Figure 5
   #+ATTR_LATEX: :width 500%
   [[./img/pa_bleu_len.PNG]]
 
@@ -79,7 +79,7 @@
 ** 入力データ
   まず入力文と出力文を畳み込みできる形にしてみましょう。以下の図を見てください。大体こんな感じで入力文と出力文を畳み込み可能な形(つまりTensor)に構成しています。なんとなく入力と出力がクロスしていること、コピーをして行列サイズを合わせていること、入力文のTensorと出力文のTensorが Embedding Depth 軸に結合されていることが想像できれば良いと思います。
   
-  #+CAPTION: Pervasive Attention :  Figure 5
+  #+CAPTION: Pervasive Attention : Input Tensor
   #+ATTR_LATEX: :width 500%
   [[./img/input_architecture.png]]
   
@@ -106,15 +106,36 @@
   [[./img/special_conv.PNG]]
   
   これが丁度 Input Tensor を上から見て畳み込みの概形を示したものです。青い部分と灰色の部分があることが解ると思います。Target sequence 方向に見て、後の方が灰色になっていることが解ると思います。つまり出力文の後の方を参照しないようにしたいと言う意図が見えると思います。やや飛躍したことを言えば、後の方を参照しないということは実質RNNのような、次の単語を予測する、という機能を見込むことができるわけです(ちなみに Transformer も似たような隠す処理を行っています)。Pervasive Attentionでは、DenseNetの一部にこの畳込み手法を用いています。
-
+  （また畳み込み処理には更に GLU(gated linear units) という手法も用いることがあったのですが、結果が芳しくなく、ちょっと長くなるのでここでは省略します。解説は [[https://mil-tokyo.github.io/paper-summary/papers/20161229-language-modeling-with-cnn][Language Modeling with Gated Convolutional Networks]] あたりがお手軽かと思います。）
+  
+  [7]: Densely Connected Convolutional Networks. Gao Huang, Zhuang Liu, Laurens van der Maaten, Kilian Q. Weinberger
 ** 予測 
-   出力文の予測には少し特殊な手続きを踏んでいます。すべてを説明するのは少し長すぎるので、一部を省略して簡潔に紹介します。
+   出力文の予測には少し特殊な手続きを踏んでいます。すべてを説明するのは少し長すぎるので、一部を省略して簡潔に紹介します。省略して、というのは実は予測の手法には４種類存在しているのですが、そのうちの一番良いものにのみ着目する、という意味です。
+   
+   さて、では DenseNetから出力されるTensorを想像してみましょう。Input Tensor のような四角い箱、見えましたね。この箱の軸は、Target Sequence の Time Step 軸、Copy(Input Sequence の Time Step)軸、そしてChannels と呼ばれる所謂埋め込みベクトルの高さの軸(Input Tensorの Embedding Depth に近い)の３軸で構成されています。
+   
+   まずこれの軸の一つ、Copy 軸を潰します。どのように潰すのかと言うのは、以下の図を見てください。Max Pooling(論文中ではこう言ってますが、正しい表現か疑問です) と Self Attention を用いている、ということがなんとなくわかると思います。
+   
+   Max Pooling がややわかりにくいので実装を元に説明すると、これはCopy軸について \(1\times\1\times |s|\) のベクトルについて最大値を取る、という操作を Channel 軸方向に繰り返す操作です。もっと詳しい操作については、[[https://github.com/elbayadm/attn2d/blob/master/nmt/models/pooling.py#L14-L34][実装]] の方をみると良いと思います。
+
+  #+CAPTION: Pervasive Attention :  Output Vector
+  #+ATTR_LATEX: :width 500%
+  [[./img/output_tensor.png]]
+   
+   
+   
+   
+   
+
+   
+   
    
    
 
     
   
-  [7]: Densely Connected Convolutional Networks. Gao Huang, Zhuang Liu, Laurens van der Maaten, Kilian Q. Weinberger
+  
 
-* 結論とか読んだ感想とか
+* 読んだ感想とか
+  この記事の終盤あたりで、恐らく[[https://arxiv.org/abs/1808.03867][改訂版]]が arxiv に上がっていたことに気が付き、なんとも言えない気持ちになりました。arxiv は論文の修正版が上がるので、論文を見るときはこっちを優先的に探したほうが良いのかもしれませんね。
   
