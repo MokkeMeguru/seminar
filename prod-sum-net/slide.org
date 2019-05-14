@@ -11,6 +11,7 @@
 #+exclude_tags: noexport
 #+creator: Emacs 25.2.2 (Org mode 9.2.2)
 * 情報                                                             :noexport:
+
 |---------------+----------------------------------+---------------------|
 | First Author  | Chai Wah Wu　                    | IBM Research Member |
 | Company       | IBM Research AI                  |                     |
@@ -32,9 +33,40 @@
 
   　しかしそういった *強いけど重い深層学習モデル* というのは実用性があるのかと言われると、結構難しいところがあります。例えば (リアルタイム)音声合成 を行う機械学習モデルなんかはでかい計算機でビッグに計算してつよつよな精度が欲しいわけではなくて、寧ろモバイル機器でもとっととまともな出力が欲しい、という需要があります。(実際以前読んだRawNetなんかやFaceBookの研究している LPCNet なんかの研究成果は、精度について競う他に、音声合成の速度やリソースの使用量に視点をおいて研究が行われています。)
 
+* 関連研究はどんなものがあるの？
+  　さて論文中ではモデルのパラメータ数を減少させる利点を２つ挙げ、その利点を得るための関連研究を挙げています。
+
+  　１つ目は、 *訓練後のモデルの軽量化* です。これは訓練後のモデルのパラメータを主成分分析なりSVDなりしてパラメータ数を圧縮する方法が考えられています。
+  
+  　２つ目は、 *訓練中のモデル* の複雑さを軽減することです。そしてこれが本論文でフォーカスしている分野です。
+
+  　２つ目についてもう少し詳しく述べると、以下の式について考えることが出来ます。
+  
+  \begin{eqnarray}
+    y_{i+1} &=& f_i (W_i y_i + b_i)\ where\ i = 1, \dots, N \\
+    where\ f_i &is& nonlinear\ function\ ex.\ ReLu\ or\ other\ identity\ function(R^{m_i}\rightarrow R^{n_{i+i}})\nonumber \\
+           W_i &is& a\ matrix\ which\ means\ weight (R^{m_i\times n_i})\nonumber \\
+           b_i &is& a\ vector\ which\ means\ bias (R^{m_i)}\nonumber \\
+           y_i &is& a\ vector (R^{n_i})\nonumber
+  \end{eqnarray}
+  
+  　この式は簡単な深層学習の一層を表しています。 $f_i$ については事前に与えられており固定されたものとすると、この式の最適化は、 $y_k$ への入力を $x_k$ としてその際の正解出力を $z_k$ 、予測出力を $\tilde{z_k}$ とすると、パラメータ $W_i, b_i$ に関する損失関数 $d(\cdot, \cdot)$ について $\Sigma_{k} d(\tilde{z_k}, z_k)$ の最小化とも言えます。
+  
+  　しかしここで最適化しなければならないパラメータ(trainable parameter 訓練パラメータ)は一般に $W_i, b_i$ のすべての要素の数 $n_W$ で、これはとても大きな値であると言えます。$n_W$ が大きいと、１反復にかかる計算が多くなること、 +反復回数が多くなること(読んだ感想、を参照)+ が予測され、つまり訓練時間が長くなってしまう可能性があります。
+
+  　つまり本論文では *この $n_W$ を減らせるような普遍的な構造を提案したい* 、ということになります。
+
+  　この２つ目を達成する一般的手法としては、CNN に対して Convolutional layer を導入することです（なんのこっちゃと思いますが、そのままです [2]）。Convolutional Layer が持つ効果として、Shift invariant というものがあります。これはシフト不変性と訳されることもあるように、ちょっとズレた入力画像も同等に扱うことができるという機能を示しています(要：考察)。これによって訓練パラメータを劇的に減少させることが出来ます。これは shift invariant が必要となるような問題（例えば画像識別）ではうまく機能します。別の手法としては密行列(dense weight matrices)を巡回行列 (circulant matrices)に置き換えるものが知られています[3]。
+  
+  　
+  [2]: 原(The most well known model reduction technique is the introduction of the convolutional layer in convolutional neural networks.)
+  [3]: [[https://arxiv.org/abs/1708.08917][CirCNN]] (Caiwen Ding, Siyu Liao, Yanzhi Wang, Zhe Li, Ning Liu, Youwei Zhuo, Chao Wang, Xuehai Qian, Yu Bai, Geng Yuan, Xiaolong Ma, Yipeng Zhang, Jian Tang, Qinru Qiu, Xue Lin, Bo Yuan)
 * どのくらいの精度が出たの？
+  
 * どういう手法を提案したの？
 * 読んだ感想とか
   　この論文、とてもおもしろい研究だと思うんですが、 *どこの学会にも出されていない* という不思議なことになっています。多分出したところから落とされたのかな？と思っているんですが、どうなんでしょう？
   
   　また再現実験をしているレポジトリとかも見当たらないのが気になったりしています。 +どこかに実装ないかな…+
+
+  　また、Pervasive Attention でわかったように、必ずしもパラメータ数が計算量に比例するわけではなさそうなので、この手法を用いることの利点とされる、訓練回数が少なくなる、というのは少し難しいと思われますね。
