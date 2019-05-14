@@ -1,0 +1,30 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
+#+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+options: tasks:t tex:t timestamp:t title:t toc:t todo:t |:t
+#+title: モデルのパラメータ数を減少させる手法、ProdSumNet を読む
+#+date: <2019-04-24 Wed>
+#+author: MokkeMeguru
+#+email: meguru.mokke@gmail.com
+#+language: ja
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 25.2.2 (Org mode 9.2.2)
+* 情報                                                             :noexport:
+  |---------------+----------------------------------|
+  | First Author  | Chai Wah Wu　                    |
+  | Company       | IBM Research AI                  |
+  |               | IBM T. J. Watson Research Center |
+  |---------------+----------------------------------|
+  | Second Author | nil                              |
+  |---------------+----------------------------------|
+  | Date          | September 6, 2018                |
+  |---------------+----------------------------------|
+  | Society       | nil                              |
+  |---------------+----------------------------------|
+  
+* 導入
+* モデルのパラメータ数を減少させると何が良いの？
+* どのくらいの精度が出たの？
+* どういう手法を提案したの？
+* 読んだ感想とか
