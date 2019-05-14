@@ -1,3 +1,13 @@
+#+latex_class: article
+#+latex_class_options:
+#+latex_header:
+#+latex_header_extra:
+#+description:
+#+keywords:
+#+subtitle:
+#+latex_compiler: pdflatex
+#+date: \today
+
 #+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
 #+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
 #+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
@@ -25,7 +35,7 @@
 |---------------+----------------------------------+---------------------|
   
 * 導入
-  ProdSumNet、というのは深層学習で *線形演算子* をより単純な形に書き換え、そのモデルの **パラメータ数を減らす ** フレームワークを提案した論文です。この線形演算子はCNNやKFC(?)、[[https://towardsdatascience.com/understanding-2d-dilated-convolution-operation-with-examples-in-numpy-and-tensorflow-with-d376b3972b25][Dilated CNN]] といったアーキテクチャ全てにこの手法は適用可能であることが特徴として挙げられ、それらのパラメータ数を減少することに成功しました。実験としては、MNISTとFashion MNISTを用いました。
+  ProdSumNet、というのは深層学習で *線形演算子* をより単純な形に書き換え、そのモデルの **パラメータ数を減らす ** フレームワークを提案した論文です。この線形演算子はCNNや[[https://arxiv.org/abs/1602.01407][KFC]]、[[https://towardsdatascience.com/understanding-2d-dilated-convolution-operation-with-examples-in-numpy-and-tensorflow-with-d376b3972b25][Dilated CNN]] といったアーキテクチャ全てにこの手法は適用可能であることが特徴として挙げられ、それらのパラメータ数を減少することに成功しました。実験としては、MNISTとFashion MNISTを用いました。
 
   また別の内容としては、 *Convolutional Layer の代替となる手法* を提案しました。こいつは訓練することが出来るパラメータ数を動的に変更することができること、ややもすればパラメータ数と誤り率のトレードオフを調べることが出来ると考えられています。実験としてはMNIST を用い、 $3 \times 10^6$ 以上の訓練パラメータを持つCNNネットワークを提案手法で置き換え、3554 個にまで訓練パラメータを減少させた上で 98.44% の Accuracy を達成しました。
 * モデルのパラメータ数を減少させると何が良いの？
@@ -57,16 +67,53 @@
   　つまり本論文では *この $n_W$ を減らせるような普遍的な構造を提案したい* 、ということになります。
 
   　この２つ目を達成する一般的手法としては、CNN に対して Convolutional layer を導入することです（なんのこっちゃと思いますが、そのままです [2]）。Convolutional Layer が持つ効果として、Shift invariant というものがあります。これはシフト不変性と訳されることもあるように、ちょっとズレた入力画像も同等に扱うことができるという機能を示しています(要：考察)。これによって訓練パラメータを劇的に減少させることが出来ます。これは shift invariant が必要となるような問題（例えば画像識別）ではうまく機能します。別の手法としては密行列(dense weight matrices)を巡回行列 (circulant matrices)に置き換えるものが知られています[3]。
-  
-  　
+    　
   [2]: 原(The most well known model reduction technique is the introduction of the convolutional layer in convolutional neural networks.)
-  [3]: [[https://arxiv.org/abs/1708.08917][CirCNN]] (Caiwen Ding, Siyu Liao, Yanzhi Wang, Zhe Li, Ning Liu, Youwei Zhuo, Chao Wang, Xuehai Qian, Yu Bai, Geng Yuan, Xiaolong Ma, Yipeng Zhang, Jian Tang, Qinru Qiu, Xue Lin, Bo Yuan)
-* どのくらいの精度が出たの？
   
+  [3]: [[https://arxiv.org/abs/1708.08917][CirCNN]] (Caiwen Ding, Siyu Liao, Yanzhi Wang, Zhe Li, Ning Liu, Youwei Zhuo, Chao Wang, Xuehai Qian, Yu Bai, Geng Yuan, Xiaolong Ma, Yipeng Zhang, Jian Tang, Qinru Qiu, Xue Lin, Bo Yuan)
 * どういう手法を提案したの？
+  　この論文のアイデアの根幹は以下の式になります。
+
+  \begin{eqnarray}
+  W &=& \prod_{j=1}^{p}\Sigma_{k=1}^{s_i} g_{jk} (a_jk) M_{jk}\\
+  where\ a_{jk} &are&  the\ trainable\ parameters, also\ denoted\ as\ the\ variable\ parameters \nonumber \\
+  j &=& 1,\dots, p \nonumber \\
+  k &=& 1,\dots, s_j \nonumber \\
+  M_{jk} &are& the\ fixed\ parameters\ (matrices) \nonumber \\
+  g_{jk} &are& the\ fixed\ nonlinear\ functions \nonumber
+  \end{eqnarray}
+  
+  　これは重み行列 $W$ を計算するために提案された式です。
+  
+  　 $a_{jk}$ というのが訓練パラメータで、論文中では可変パラメータとも呼称されるものです。
+  
+  　 $M_{jk}$ は固定された行列であり、このサイズは、$M_{jk}$ と $M_{jk'}$ に関しては同じ次元数、 $M_{jk}$ と ${M_{j+1, k}}$ に関してはこの間で加算、乗算が可能であるように制限されます。
+  
+  　 非線形関数である $g_{jk}$ は微分可能な関数であれば、簡単に導出することが出来るので、本論文中ではすべて $g_{jk}(x) = x$ としています。
+  
+  　この手法によって $W$ のための訓練パラメータの総数 $n_W$ は、 $\Sigma_j {s_j}$ となります。つまり最適な重みである $W_{opt}$ がもし $a_{ij}$ を用いて近似分解できる場合(かつ $\Sigma_{i} s_i$ が小さい場合)、この手法によってモデルのパラメータ数は劇的に減らすことが出来ます。またもし先に $W_{opt}$ の近似が得られている場合（例えば転移学習など）では、パラメータ数を減らすためにその重み行列を上式の形に低ランク分解することが出来ます。
+ 
+  　またこの手法が convolutional layer や KFC, curculant matrices, Toeplitz matrices Handel matrices などでも有効であること(重み行列を分解することができること)は明らかです。
+  
+  　但しこの手法は、 $n_W$ を小さい値で抑えながら、最適な固定パラメータと分解を見つけることですが、本手法では訓練可能なパラメータを任意に変更できるという利点を持っています(他の手法を用いた分解方法だと、行列サイズを固定する必要があることが差異)。
+  
+  　しかもこの提案手法は、現在ある深層学習用のアーキテクチャで用意に実装できます。この証拠として、先程の分解の式の偏微分は以下のように導出することが出来ます。
+  
+  
+  
+* どのくらいの精度が出たの？
+  いくつかのテーマに別れて実験が行われているので、それぞれについて簡潔に紹介します。
+** 一つの行列和の分解(提案手法の p=1)
+
+** 複数の行列和の内積の分解(提案手法の p>1)
+
+** Convolutional Layer のない画像認識タスク
+
 * 読んだ感想とか
   　この論文、とてもおもしろい研究だと思うんですが、 *どこの学会にも出されていない* という不思議なことになっています。多分出したところから落とされたのかな？と思っているんですが、どうなんでしょう？
   
   　また再現実験をしているレポジトリとかも見当たらないのが気になったりしています。 +どこかに実装ないかな…+
 
   　また、Pervasive Attention でわかったように、必ずしもパラメータ数が計算量に比例するわけではなさそうなので、この手法を用いることの利点とされる、訓練回数が少なくなる、というのは少し難しいと思われますね。
+  　
+  　（あとこの論文中で言われていた、CirCNNという論文がとてもパワーがあるのでそのうち目を通したいです。）
