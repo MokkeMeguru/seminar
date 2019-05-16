@@ -15,7 +15,7 @@
   
   　今回読む論文＋スライドは、[[https://sites.google.com/view/deepdial/][Deep learning for Dialogue Systems]] というもので、2017年から毎年更新されている「(深層学習を用いた)対話システムってなんだよ」という聴者を対象にした「対話システムの今昔」を紹介するものです。これを書いているのは、National Taiwan Universityのコンピュータサイエンス・情報工学の助教の方、Microsoft Researchの深層学習研究チームの方、元Google Researchの研究者でAmazonの研究科学者の方の3名となっています。つまるところ、 *ほぼほぼ無敵な布陣* 、というわけです。(あとOpenAIの自然言語処理の人も加わったら多分何も文句言えないですね…)
 
-  　但しこの論文の趣旨は、「 *Task-oriented Spoken Dialogue System* (タスク志向な、音声を介した対話システム)」があり、つまり *雑談対話とかは趣旨ではないです* 。
+  　但しこの論文の趣旨は、「 *Task-oriented Spoken Dialogue System* (タスク指向な、音声を介した対話システム)」があり、つまり *雑談対話とかは趣旨ではないです* 。
   
     　また以下の記事は Deep learning for Dialogue Systems の Univesity Tutorials の、KAUST 2019 で使われた [[https://www.csie.ntu.edu.tw/~yvchen/doc/KAIST19_Tutorial.pdf][スライド]] と 2018年度の [[https://aclweb.org/anthology/C18-3006][論文]]を元に作成しています。
 * Dialogue Systems の種類と歴史
