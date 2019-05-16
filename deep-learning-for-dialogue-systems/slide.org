@@ -29,22 +29,28 @@
   
   - 雑談対話
     1. Seq2Seq
+
         機械翻訳のように1入力to1出力の対話を行う
        
     2. Seq2Seq with converssation contexts 
+
         文脈情報をもって複数(過去の情報を含む、という意味)入力to1出力の対話を行う(A Hierarchical Latent Variable Encoder-Decoder Model for Generating Dialogues. Iulian V. Serban et al.) 
 
     3. Knowledge-groundes Seq2Seq 
+
         環境情報(Knowledge) をもって対話を行う。(Knowledge-grounded Neural Conversation Model. Marjan Gazvininejad et al. (?))
 
   - タスク指向会話
     1. Single-domain, System-initiative
+
        対話システム主導で、特定のドメインに特化した対話を行う。
 
     2. Multi-domain, contextual, mixed initiative
+
        複数のドメインに対応でき、文脈が考慮できる他、ユーザが多少対話の主導権を握ることも出来る。
 
     3. End-to-End learning,  massively multi-domain
+
        End-to-Endな学習を行い、より多くのドメインに対応出来る。(End-to-End Task-Completion Neural Dialogue Systems, Xiujun Li et al. (?) ([[https://github.com/jojonki/arXivNotes/issues/33][abstract]]))
        
        #+CAPTION: Deep Learning for Dialogue Systems (slide. 12)
@@ -72,11 +78,15 @@
    　状況はスマートフォンに搭載された対話システムに、レストランの予約を頼もうとするユーザの図です。まず音声入力はSpeech Recognition によって、「ここらへんに美味しい和食の店ある？」というテキストになります。これをNLUでは、
 
     1. まずレストランについての話をしている、という風に *クラス(ドメイン)分類* します (Domain Identification)。
+
          こうすることで知識ベースなりデータベースなりのどの辺りを見ればよいのかという検討がつき、検索がしやすくなります。
+
     2. 次に「レストランを探している」という大まかな意味を *分類タスク* を持って判定します(User Intent Detection)。
+
         タスク指向型の対話システムで考えるならば``タスク推定”とも言えるプロセスでしょうか。一般的にはこの大まかな意味は先に与えられた複数の選択肢の中から選択する、という手法が取られています(Slot Fillingのためと思われる)。
         
     3. 最後に Slot Filling というプロセスでが行われます。
+
        ここでは与えられている、「どんなレストランを探しているのか→``和食"」「どこのレストランを探しているのか→``ここ(位置情報なりより補完)"」「どんな感じのレストランを探しているのか→``美味しい”」といった *タスクを達成するために必要な情報をテキストから抽出します* 。欲しい情報を予め定義している場合が多いことから、Slot に情報を入れていく、という意味合いが感じ取れると思います。(尚実際にはテキスト中の単語に対してタグ付けをしていくという手法が一般的です。)
     
     以上のことから「ここらへんに美味しい和食の店ある？」は {domain: "レストラン", query: "レストランを探す", slots [where: "...", kind, "和食", taste: "美味しい"] } みたいな情報に変換されます。
@@ -87,12 +97,14 @@
     　また論文やスライドではかなり曖昧にされていますが、 *Dialogue State Tracking* と *Dialogue Policy* の間で *BackEnd Acton / Knowledge Providers* との通信が行われており、具体的には Dialogue State Tracking 以前から得られた情報を元に、 Policyの選択肢を得るプロセスになっていると考えられます。
 
     1. Dialogue State Tracking 
+
        　ここはかなり複雑な部分で、恐らく元の論文やスライドを見ても簡単には理解が出来ないかもしれません。これは対話のプロセス全体を想像して見ることから始めて下さい。結局の所我々は一つの発話で全ての情報を伝えることは非常に少なく、 *複数の発話によって* 言いたい全ての情報を相手に与えることがほとんどです。すると対話が進んでいくと状態が進んでいき、あるところで終点(或いはExit(打ち切り))になると考えられます。これらをStateと考えると、これはマルコフモデルのような図を想像することが出来ます。これを管理するのが Dialogue State Tracking というわけです。
        
        #+CAPTION: Deep Learning for Dialogue Systems (slide. 21)
        [[./img/State-tracking.png]]
 
     2. Dialogue Policy
+
        　ここは *BackEnd Action / Knowledge Providers* から得られた選択肢からどれを選ぶと最も高い報酬を得られるか考え、最も適当なそれを選択する部分です。この文脈における Policy というのは日本語でいうと``方策” というのが最もふさわしいでしょう。というのもこの部分に関しては、最近部分観測マルコフ過程の強化学習(Reinforest Learning)という枠組みで研究されることが多いからです(強化学習の文脈でPolicyはほとんどの場合で``方策"と訳されます)。
 
        わかりやすくするため、NLUの例を持ち出すならば、方策リストとして「予算を尋ねる」「レストランAを紹介する」などが考えられ、報酬を考えた結果「予算を尋ねる」が選択される、ということです。
