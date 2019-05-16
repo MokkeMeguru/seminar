@@ -13,19 +13,19 @@
 * 導入
   　 ~今まで徒然なるままに論文を読むなりしてきたわけだが、ついに自分がどこに居るのかわからなくなり、最後に自分がいた場所である対話システムの分野に一旦立ち戻ろう、となった5月の半ば。全体を俯瞰できるものを探した所、ちょうどよいものが見つかったので読んでみる。~
   
-  　今回読む論文＋スライドは、[[https://sites.google.com/view/deepdial/][Deep learning for Dialogue Systems]] というもので、2017年から毎年更新されている「(深層学習を用いた)対話システムってなんだよ」という聴者を対象にした「対話システムの今昔」を紹介するものだ。これを書いているのは、National Taiwan Universityのコンピュータサイエンス・情報工学の助教の方、Microsoft Researchの深層学習研究チームの方、元Google Researchの研究者でAmazonの研究科学者の方の3名となっています。つまるところ、 *ほぼほぼ無敵な布陣* 、というわけです。(あとOpenAIの自然言語処理の人も加わったら多分何も文句言えないですね…)
+  　今回読む論文＋スライドは、[[https://sites.google.com/view/deepdial/][Deep learning for Dialogue Systems]] というもので、2017年から毎年更新されている「(深層学習を用いた)対話システムってなんだよ」という聴者を対象にした「対話システムの今昔」を紹介するものです。これを書いているのは、National Taiwan Universityのコンピュータサイエンス・情報工学の助教の方、Microsoft Researchの深層学習研究チームの方、元Google Researchの研究者でAmazonの研究科学者の方の3名となっています。つまるところ、 *ほぼほぼ無敵な布陣* 、というわけです。(あとOpenAIの自然言語処理の人も加わったら多分何も文句言えないですね…)
 
   　但しこの論文の趣旨は、「 *Task-oriented Spoken Dialogue System* (タスク志向な、音声を介した対話システム)」があり、つまり *雑談対話とかは趣旨ではないです* 。
-* Dialogue Systems の種類と歴史
-  　この部分は Deep learning for Dialogue Systems の Univesity Tutorials の、KAUST 2019 で使われた [[https://www.csie.ntu.edu.tw/~yvchen/doc/KAIST19_Tutorial.pdf][スライド]] を元に作成しています。
   
-  　対話システムのはじまりへ目を向けると、1990年代の *Keyword Spotting* (ex. AT&T) というものから始まります。こいつは要するに、「AかBかCか言って、そしたらシステムがAかBかCかを判断します」、というようなものです。そこから *マルチモーダル対話システム* (文字以外の情報(ex.画像とか)も対話システムに組み込んだもの。日本では2016年度頃から記事が増えていますが、2000年初頭頃の技術らしいですね…)という風に進んでいき、最終的に皆さんご存知、*Virtual Personal Assisttants* という風に進んできています。
+    　また以下の記事は Deep learning for Dialogue Systems の Univesity Tutorials の、KAUST 2019 で使われた [[https://www.csie.ntu.edu.tw/~yvchen/doc/KAIST19_Tutorial.pdf][スライド]] と 2018年度の [[https://aclweb.org/anthology/C18-3006][論文]]を元に作成しています。
+* Dialogue Systems の種類と歴史
+  　対話システムのはじまりへ目を向けると、1990年代の *Keyword Spotting* (ex. AT&T) というものから始まります。こいつは要するに、「AかBかCか言って、そしたらシステムがAかBかCかを判断します」、というようなものです。そこから *マルチモーダル対話システム* (文字以外の情報(ex.画像とか)も対話システムに組み込んだもの。日本では2016年度頃から記事が増えていますが、2000年初頭頃の技術らしいですね…)という風に進んでいき、最終的に皆さんご存知、 *Virtual Personal Assisttants* という風に進んできています。
   
   　 *Virtual Personal Assistants* とは  Apple Siri だとか、 Microsoft Cortana だとか Amazon Alexa だとか、 Apple Home Pod 、Google Assistant といったものを指します。これらの需要は、 *専ら生活や仕事の補助* 、という風になっており、例えばスケジュールを組んだりとか、ものを探したりだとか、といったものとみなされています。
   
   　またこいつらが良いとされる基準は、「 *ユーザが求める情報に簡単にアクセスできること* 」、「 *ユーザの抱えるタスクを効率的に消化できるように助けられること* 」と言われています。([[https://qiita.com/MeguruMokke/items/561e778ccd69e5160c74#amazon-alexa-prize-2018-%E3%81%A8%E3%81%AF%E4%BD%95%E3%81%A0%E3%81%A3%E3%81%9F%E3%81%AE%E3%81%8B][Amazon Alexa Prize]] や NTT の対話コンペティションなんかは対話時間やユーザの満足度、が評価基準になっていたので少し違っていますね。)
   
-  　さて、対話システム全体の変遷がなんとなくわかってきたところで、対話システムの二柱となる、雑談対話、タスク志向対話の2つの変遷を眺めると、以下のようになります。
+  　さて、対話システム全体の変遷がなんとなくわかってきたところで、対話システムの二柱となる、雑談対話、タスク指向対話の2つの変遷を眺めると、以下のようになります。
   
   - 雑談対話
     1. Seq2Seq
@@ -45,12 +45,18 @@
        複数のドメインに対応でき、文脈が考慮できる他、ユーザが多少対話の主導権を握ることも出来る。
 
     3. End-to-End learning,  massively multi-domain
-       End-to-Endな学習を行い、より大くのドメインに対応出来る。(End-to-End Task-Completion Neural Dialogue Systems, Xiujun Li et al. (?) ([[https://github.com/jojonki/arXivNotes/issues/33][abstract]]))
+       End-to-Endな学習を行い、より多くのドメインに対応出来る。(End-to-End Task-Completion Neural Dialogue Systems, Xiujun Li et al. (?) ([[https://github.com/jojonki/arXivNotes/issues/33][abstract]]))
+       
+       #+CAPTION: Deep Learning for Dialogue Systems (slide. 12)
+       [[./img/ConversationalAgents.png]]
 
     専らこの論文では後者のタスク指向型の研究の紹介がメインになっており、実際見る限り研究分野としても後者のほうが(需要が高いので)沢山論文が出ているようです。
 * Dialogue Systems の基本形態
   　Dialogue Systems は特に最近では *実質なんでもあり* なところがありますが、一応ベースとなる概要図というものがあります。それが以下です。これは 2011年に出された Spoken Language Understanding: Systems for Extracting Semantic Information from Speech という書籍に出てくる図です。これは標準的なパイプラインフレームワークということで、対話システムという一つのシステムの中に小さなシステムがあり、それがデータを介して繋がっているという話になります。言い換えれば *End-to-Endに何かでっかいモデルを使って処理しているわけではない* 、というわけです。
   
+  #+CAPTION: Deep Learning for Dialogue Systems (slide. 14)
+  [[./img/Task-oriented-dialogue-systems.png]]
+
   　さて図を眺めてみると、 *Speach Recognition* *Launguage Understanding* *Dialogue Management* *Natural Language Generation* 、そして *Backend Action / Knowledge Providers* 、最後に *User* の5つが登場していることがわかります。
 
   　そして研究者はこの5分野から任意の一つ、ないし複数の組み合わせ、ないし *任意の一つの中の一要素* について研究を行います。Userってなんだよ？と疑問に思う方が居るかもしれませんが、ユーザシミュレーションの観点から、人間から機械への発話のみを学習する、という面白い研究が存在しています ( [[https://arxiv.org/pdf/1607.00070.pdf][A Sequence to Sequence Model for User Simulation in Spoken Dialogue Systems]] )。
@@ -82,8 +88,9 @@
 
     1. Dialogue State Tracking 
        　ここはかなり複雑な部分で、恐らく元の論文やスライドを見ても簡単には理解が出来ないかもしれません。これは対話のプロセス全体を想像して見ることから想像して下さい。結局の所我々は一つの発話で全ての情報を伝えることは非常に少なく、 *複数の発話によって* 言いたい全ての情報を相手に与えることがほとんどです。すると対話が進んでいくと状態が進んでいき、あるところで終点(或いはExit(打ち切り))になると考えられます。これらをStateと考えると、これはマルコフモデルのような図を想像することが出来ます。これを管理するのが Dialogue State Tracking というわけです。
-
-       [図]
+       
+       #+CAPTION: Deep Learning for Dialogue Systems (slide. 21)
+       [[./img/State-tracking.png]]
 
     2. Dialogue Policy
        　ここは専らBackEnd Action / Knowledge Providersから得られた選択肢からどれを選ぶと最も高い報酬を得られるか考え、最も適当なそれを選択する部分です。この文脈における Policy というのは日本語でいうと``方策” というのが最もふさわしいでしょう。というのもこの部分に関しては、最近部分観測マルコフ過程の強化学習(Reinforest Learning)という枠組みで研究されることが多いからです(強化学習の文脈でPolicyはほとんどの場合で``方策"と訳されます)。
