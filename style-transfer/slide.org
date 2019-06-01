@@ -1,0 +1,49 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
+#+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+options: tasks:t tex:t timestamp:t title:t toc:t todo:t |:t
+#+title: 対話の応答文をいい感じにスタイル変換するための実験
+#+date: <2019-04-24 Wed>
+#+author: MokkeMeguru
+#+email: meguru.mokke@gmail.com
+#+language: ja
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 25.2.2 (Org mode 9.2.2)
+#+startup: 2
+* 導入
+  ぼくのかんがえたさいつよの 対話システム をつくりたい
+  
+  僕の過去の投稿を見ればなんとなくわかると思いますが、僕がここ数年研究している内容は特に深層学習を用いた対話システムの一部だったり全体だったりです。
+  
+  ところでさいつよの対話システムなるものを思い描いているわけですが、みなさんの考える「さいつよ」とはなんでしょう。
+  
+  例えばそれはお願いしたいことをきちんと汲み取って、さっさとその処理を完了させてくれることを指したり、或いは意図を上手く汲み取ってくれることを指したりするかもしれません。
+  
+  そんな中で僕の思い浮かべる「さいつよ」とは、”めっちゃ人っぽい！”というものです。人っぽい、というのは例えば好きな食べ物があったり、ジェットコースターが苦手だったり、性別が何となく透けて見えたり、”特定の口調”があったりすることを指します。
+  
+  今回僕が紹介するのは、そんな「さいつよ」の要素の一つ、”特定の口調”を持たせる部分の実験です。
+
+* 関連研究
+  文章に対してスタイル付けを行うというタスクは、マイナーな ように見えて実際マイナーでした。なぜなら評価が簡単に出来るものではないからです。画像のスタイル変換なんかは Inseption Score なんかを使うことが出来るようですが、自然言語処理でそのような枠組みはあまりしっかりと確立されていません(今年になって、こういう評価をしようぜ、という[[https://arxiv.org/abs/1904.02295][論文]] が出ているので、この分野を研究したい人は参考にすると良いでしょう)。後はこのタスクにあんまり需要がない、というのもあります。訛りのある文章を修正したり、 [[https://gigazine.net/news/20181023-linus-torvalds-return-to-linux/][某ーナスさんみたいに人間の気持ちを理解した文章に修正したりする場合]] くらいしか実用的な使い道が見えない、ということです。とはいえ最近では(というか2019年度は)びっくりするくらい論文が出ているので、"いよいよ時代が来たな"、という心持ちです。
+
+  そんな中で関連研究として挙げられるものは、Sequence to Better Sequence [Sequence to Better Sequence] 、Style Transfer from Non-Parallel Text by Cross-Alignment[Style Transfer from Non-Parallel Text by Cross-Alignment] 辺りが有名でしょう(~僕が研究していた当時はこれらが有名でした~)。Style Transfer from Non-Parallel Text by Cross-Alignment については DL輪講の [[https://www.slideshare.net/yuyasoneoka/dlstyle-transfer-from-nonparallel-text-by-crossalignment-81453311][SlideShare]] がわかりやすかったので、こちらをおすすめします。また関連研究の一覧を見たいのならば、こちらの [[https://github.com/fuzhenxin/Style-Transfer-in-Text][Githubのページ]] がおすすめです。
+  Sequence to better Sequence についての簡単な説明はこちらの [[https://vimeo.com/240608222][研究発表の動画]] が公式な感じなので良いのではないでしょうか。
+
+* 実験に用いる手法
+  今回実験に用いるのは、Sequence to Better Sequence をちょっと弄ったモデルと CopyNet と呼ばれるモデルです。
+
+** Sequence to Better Sequence をちょっと弄ったモデル
+    Sequence to Better Sequence は文のスタイル変換を行うための手法です。これは VAE を用いて手法で、簡単に説明すると、VAEによって得られる潜在表現に "スタイル度" を評価する軸を導入し、同じ意味の範囲内でその軸に従って文の意味を表す潜在ベクトルを滑らせることで、スタイルが付与された文の潜在ベクトルを得る、というようなことをします。
+    その学習過程において、VAEを用いて学習データを潜在空間に映し出すプロセスが存在します。このプロセスでは、入力にノイズをかけて出力でノイズがかかっていないものを予測する、というようなプロセスで行うと性能が良くなる可能性があります。これはDenoising Auto Encoder（DAE）なんかの資料を読むとわかると思います。
+
+    そこで僕は Sequence to Better Sequence に DAE のアイデアを持ち込もうとしました。これがちょっと弄った、という意味になります。
+
+    とはいえあんまりデータの量が足りていないので、比較実験とか真面目な実装とかはしていません（実験したかったんですが、たかだかモデルちょっと弄っただけで大したことしてねえじゃん、って大学で言われてしまいあんまり研究させてもらえなかったとかなんとか）。
+
+    ソースコードは [[https://github.com/MokkeMeguru/seq2bseq][僕のレポジトリ]] にあります。seq2bseq/model/trainfromcsv.ipynb に従って実行してください。データセットは、 [[https://github.com/MokkeMeguru/st-data][ここ]] にあります。個人で作っているのでデータ数はめっちゃ少ないですが、変なデータは入っていないということでご勘弁下さい。またソースコードにはやたら滅多に日本語の解説をぶち込んであるので Tensorflow で自然言語処理みたいなのやりたい人は参考になるかもしれませんし、ならないかもしれません。
+    
+** CopyNet
+   CopyNetは文章の要約のタスクで用いられたり、機械翻訳のタスクで用いられたりするモデルです。このモデルの利点は、未知語に対しての対応が出来る、というものです。このモデルが行っていることを簡易に説明すると、
+    
+* 
