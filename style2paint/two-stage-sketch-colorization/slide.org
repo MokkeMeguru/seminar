@@ -1,0 +1,123 @@
+#+TITLE: スケッチ to イラストな手法、style2paint を読む(1)
+#+AUTHOR: コンピュータサイエンス専攻 江畑 拓哉(201920631)
+# This is a Bibtex reference
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:t arch:headline ^:nil
+#+OPTIONS: author:t broken-links:nil c:nil creator:nil
+#+OPTIONS: d:(not "LOGBOOK") date:nil e:nil email:nil f:t inline:t num:t
+#+OPTIONS: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+OPTIONS: timestamp:nil title:t toc:nil todo:t |:t
+#+LANGUAGE: ja
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 26.2 (Org mode 9.2.3)
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [a4paper, dvipdfmx, 10pt]
+#+LATEX_HEADER: \usepackage{amsmath, amssymb, bm}
+#+LATEX_HEADER: \usepackage{graphics}
+#+LATEX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \usepackage{times}
+#+LATEX_HEADER: \usepackage{longtable}
+#+LATEX_HEADER: \usepackage{minted}
+#+LATEX_HEADER: \usepackage{fancyvrb}
+#+LATEX_HEADER: \usepackage{indentfirst}
+#+LATEX_HEADER: \usepackage{pxjahyper}
+#+LATEX_HEADER: \hypersetup{colorlinks=false, pdfborder={0 0 0}}
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage[backend=biber, bibencoding=utf8]{biblatex}
+#+LATEX_HEADER: \usepackage[top=20truemm, bottom=25truemm, left=25truemm, right=25truemm]{geometry}
+#+LATEX_HEADER: \usepackage{ascmac}
+#+LATEX_HEADER: \usepackage{algorithm}
+#+LATEX_HEADER: \usepackage{algorithmic}
+#+LATEX_HEADER: \addbibresource{/home/meguru/Github/private-Journal/research-plan/reference.bib}
+#+DESCRIPTION:
+#+KEYWORDS:
+#+STARTUP: indent overview inlineimages
+* 導入
+  #+BEGIN_QUOTE
+  良い感じのお絵描きの補助ツールが欲しい！（友人談）
+  #+END_QUOTE
+
+  最近ですと、ClipStudio Paint Pro/Ex が *自動着彩機能* を beta 版で利用可能になるなど、 *お絵描き支援に関する研究* が *市場価値* を生んでいますね（学術的にどうかって？医療データでもない深層学習にお金が下りると思ってんの？）。
+  
+  そんなわけでスケッチtoイラストみたいな研究論文が海外や国内企業ではそれなりに数が出ているわけなんですが、その中でも即プロダクトに活かせる程度に高度なものとして [style2paint][style2paint] というものがあります。これはラフ画からい感じに着彩するというまさに文脈通りの機能を実現するためのもので、実際に対話型のソフトウェアが構築されたものです。これはバージョンが存在しており、2019年6月時点で最新となっているのは v4 です。これに関する論文が、[Two-stage Sketch Colorization][Two-stage Sketch Colorization] というものです。
+  
+  個人的な導入はともかくとして、簡単に論文で述べられている導入の方に踏み込んでみましょう。
+  
+  #+BEGIN_QUOTE
+  着彩って難しくて時間かかるし、説得力のある絵を書くには、絵師でも苦労するよね。初心者の人にはお手本となるような、絵師さんには沢山の色の組み合わせを試せるような(例えば髪の色をちょっと変えてみたりとか)仕組みを作る必要があると思うんだ。
+  
+  でも着彩にの自動化をしようと思ったら結構多くの課題があって、例えば主題を制限していない状態でのスケッチ画をモデルに理解してもらうのは至難の業だし、スケッチ画は線画に比べれば大分抽象化されているからそこの差を埋めるようにしないといけない、テクスチャとかシェーディングみたいな情報も描かれていないからそれの推測もしなくちゃぁいけない。
+  
+  ところで最近だと深層学習の技術が発展してきて、[Comicolorization][Comicolorization] なんかの技術が便利な着彩補助の関連研究として出てきているね。でもこいつらはにじみとか色の間違いとかが普通にあったりするんだ。これらを修正できるようにしなきゃいけないんだけど、スケッチ->着彩の間に僕たちユーザは上手いこと手を出すことが出来ていなくて、結局自動着彩の技術よりも手打ちの着彩の方がまだまだ人気という感じなんだ。
+ 
+  そんなわけで僕たちは自動着彩じゃなくて半自動着彩のフレームワークを提案するよ。半自動というのはどういうことかっていうと、ユーザが着彩結果をちょいちょい弄って修正できるようにしているっていう意味、つまりスケッチ->着彩(1)->ユーザの修正->着彩(2)->...->着彩(マスター) みたいなことをしたいってことだね。
+  提案したフレームワークは、２段階に別れたCNNベースのもので、一つ目は簡単に色をちらして色の概略図みたいなものを作るもの、もう一つはそこから間違いや変な質感になっているものなんかを修正して細かいところを詰めていくものになっているよ。繰り返しになるかもしれないけど、つまりスケッチｰ>着彩という問題をより単純な２つのタスクに分離したってことだね。これによってモデルの学習が効率化して、そのモデルが堅牢なものになったことがわかったよ。更に言うと、既存の着彩補助に関する手法で得られた着彩画を修正することもできることがわかったんだ。 
+
+  それで現実世界でうまく適用できるか試すためにGUIアプリを作ってユーザに使ってもらったんだけど、この手法は2段階に分かれているとはいえ、ユーザが途中結果を見ながら修正ができることなんかも相まって、ユーザからの満足度は高かったよ。
+
+  評価として用いた手法が、実アプリケーションを用いたユーザアンケートだよ。これによって既存手法より良いということを示しています。
+  
+  最後に簡単に僕達が出来たことをまとめるとこんな感じになるよ。
+  
+  1. 実世界で作られているスケッチから高品質な着彩ができる2段階の着彩モデルを作ったよ
+  2. 僕たちの提案した手法は、既存の手法と比較して着彩の誤り修正が容易でより高品質な着彩結果を得ることができるようになったよ
+  3. 実際にユーザに使ってもらえるように、実アプリケーションを作ってみたよ
+  #+END_QUOTE
+  
+  ほぼほぼ全意訳ですが、導入でおおよそ重要なことを述べきっている論文なのでもりもり書いています。
+  
+  #+CAPTION: style2paint 実アプリケーション図
+  [[./img/style2paint_app.PNG]]
+  
+* 関連研究
+  沢山ありましたので、公開されているものか、読んでみて面白そうだったものか、実際に試して面白かったものだけを抜粋して簡潔に紹介します。
+  
+** 色伝搬
+   スケッチ->単色で塗りつぶし
+
+   - [[https://dcgi.fel.cvut.cz/home/sykorad/Sykora09-EG.pdf][Lazy Brush]]
+     スケッチからいい感じに領域選択して色を塗りつぶす研究。深層学習とかの手法でもないし、恐らく機械学習というわけでもないです。[[http://animatetvp.blogspot.com/2015/01/lazybrush.html][実アプリケーションとしてある]]らしく、チュートリアルムービーを見ることが出来ますが、めっちゃ早いです。領域選択系になるので、医療データの癌領域特定なんかに活かせそうですね。大学かなんかでやればいいんじゃないっすかね。
+
+** 機械学習ベースの自動着色
+   スケッチ->カラー画像
+   Scribbler と Comicolorization はざっくり言うと、encoder-decoder型のGenerator＋GANsのDiscriminatorのような形を取っています。この部分の研究だと、敵対性ネットワークを用いるのがデフォルトという感じになるようです。
+   
+   - [[https://arxiv.org/abs/1612.00835][Scribbler]]
+     スケッチ から カラー画像 or 線画+補助色 から カラー画像を作る手法です。要所要所に色の情報を付け加えることで、より良い画像が出来る、というもので、本手法にはそれなりに近いのかな、と思いました。但しスケッチのクオリティが高すぎるので、初心者のお絵描き補助という目的に沿うことができるようには思えない感じです。
+     #+CAPTION: Scribbler より引用
+     [[./img/scribbler_abst.png]]
+
+   - [[https://arxiv.org/pdf/1704.08834.pdf][Outline Colorization through Tandem Adversarial Networks.]]
+     白黒の画像 から カラー画像を作るための手法です。色彩予測を行うネットワークと、シェーディングを行うネットワークを組み合わせて画像を作り出すネットワークです。白黒画像から色の予測を行い、その色予測と、元の白黒画像の陰影情報を組み合わせて画像を作る、というモデル(学習にはGANsのDiscriminatorを使う)で style2paint とは違った2段階モデルになっています。
+    
+   - [[https://arxiv.org/pdf/1705.01908.pdf][AutoPainter]]
+     GANsを用いた自動着彩について研究したいなら一度は読みたい、という感じに論文が読みやすい。（というよりは損失関数の定義がすごくわかりやすい形にな収まっている。）pix2pix とのみ比較しているのでどの程度の性能なのかイマイチ理解が出来ないところがあるが、少なくとも pix2pix に対しては圧勝しています。
+
+     面白かったのでもう少し気になったところを書くと、損失関数に画像の滑らかさを付け足す項を追加している点で、それは以下のような式になる。
+
+     $L_{tv} = \sqrt{(y_{i+1, j} - y_{i, j})^2 + (y_{i, j+1} - y_{i, j})}$ 
+    
+     この式は他の画像生成系の論文ではあんまり見ないものだったので(というよりくっきりした画像を作るのがGANsのVAEに対する強みの一つなので、それを潰しているようにも捉えられるということが不思議です)、面白みがあるなぁと思いました。
+
+     ちなみに一時期 PaintChainer の論文の盗作なのでは？という議論が上がったりもしていましたが、これは恐らく間違いです。
+
+   - PaintsChainer シリーズ
+      PFN の出した [[https://paintschainer.preferred.tech/index_ja.html][つよつよ成果物]] を引っさげたシリーズです。名前が、たんぽぽ->かな->さつき、となっている ~舐め腐った~ 特徴的なタイトルのものです。[[https://github.com/pfnet/PaintsChainer/issues/146][論文]]がないっぽいんですが、これはどういうこっちゃ…？
+
+   - [[https://arxiv.org/abs/1706.06918][cGAN-based Manga Colorization Using a Single Training Image]]
+     白黒漫画 から カラー漫画を作るための手法です。物凄い面白い手法を使っているんですが、簡単な特徴に関する説明は [[http://yusuke-ujitoko.hatenablog.com/entry/2017/07/01/234633][このページ]] にあります。大量のデータで殴りつける最近のビッグデータでグローバルなジャパニーズドリーム()なものとは違い、とても日本人臭い泥にまみれた手法を使っているので、一度読んでみると面白いと思います。
+     ちなみにこの手法を用いて低賃金で鬼のように働かされている日本人の漫画家やアニメータを救おう！みたいな [[http://broncoscholar.library.cpp.edu/bitstream/handle/10211.3/207996/YanYiyang_Thesis2018.pdf?sequence=3][調査論文]] が *海外* で出ているのは、これも日本らしくて大好きです。
+
+   - [[http://iizuka.cs.tsukuba.ac.jp/projects/colorization/ja/][Let there be Color!]]
+     早稲田大学の出した白黒画像の自動着彩に関する論文。大域・中域・少域特徴を得るためのネットワーク＋色付けのネットワークの4つのネットワークをまとめ、彩色画像を作り、それを元の白黒画像と組み合わせることでカラー画像を生成します。テレビなんかでも大きく取り上げられたモデルらしいです。大域的・局所的、みたいな文言と最近出てきた [[https://qiita.com/koshian2/items/0e40a5930f1aa63a66b9][OctConv のモデル]] がなんとなく発想が似ている気がしたのでピックアップしました。
+
+** スケッチ処理
+   
+* モデル概要
+** Stage 1
+** Stage 2
+* 評価
+* 感想
+  僕はあんまり画像系の研究はしていないんですが、この論文はとても読みやすい部類であったと思います。これも潜在空間をうまく使って研究しているような感じで、最近読んだ [TransGaGa][TransGaGa] の技術を組み合わせるとか [Glow][Glow] を参考に潜在表現の構築手法をアップデートするとか、Second Stage を強化学習の分野に持ち込んでみるとか、色々研究していみたいテーマが見える面白い分野だなぁと思いました。（小並感・２分位でぱっと提案した感）
+  
+  ClipStudioさん とか Pixiv さんとか PFN さんとかで研究してくれないかなぁ（チラッチラッ）
