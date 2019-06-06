@@ -261,4 +261,4 @@ TSWLatexianTemp*
 *.sta
 
 # my settings
-!/ltximg/*
+*ltximg/
