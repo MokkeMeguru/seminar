@@ -259,4 +259,6 @@ TSWLatexianTemp*
 
 # standalone packages
 *.sta
-*/ltximg/*
+
+# my settings
+!/ltximg/*
