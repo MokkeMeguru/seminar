@@ -1,5 +1,5 @@
 #+TITLE: スケッチ to イラストな手法、style2paint を読む
-#+AUTHOR: コンピュータサイエンス専攻 江畑 拓哉(201920631)
+#+AUTHOR: MokkeMeguru
 # This is a Bibtex reference
 #+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:t arch:headline ^:nil
 #+OPTIONS: author:t broken-links:nil c:nil creator:nil

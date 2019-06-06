@@ -30,11 +30,11 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \addbibresource{/home/meguru/Github/private-Journal/research-plan/reference.bib}
-\author{コンピュータサイエンス専攻 江畑 拓哉(201920631)}
+\author{MokkeMeguru}
 \date{}
 \title{スケッチ to イラストな手法、style2paint を読む}
 \hypersetup{
- pdfauthor={コンピュータサイエンス専攻 江畑 拓哉(201920631)},
+ pdfauthor={MokkeMeguru},
  pdftitle={スケッチ to イラストな手法、style2paint を読む},
  pdfkeywords={},
  pdfsubject={},
@@ -44,7 +44,7 @@
 
 \maketitle
 \section{導入}
-\label{sec:org865b5c7}
+\label{sec:org07b1c8e}
 \begin{quote}
 良い感じのお絵描きの補助ツールが欲しい！（友人談）\\
 \end{quote}
@@ -87,11 +87,11 @@
 \end{figure}
 
 \section{関連研究}
-\label{sec:org5f7d7c1}
+\label{sec:org6fd964f}
 沢山ありましたので、公開されているものか、読んでみて面白そうだったものか、実際に試して面白かったものだけを抜粋して簡潔に紹介します。\\
 
 \subsection{色伝搬}
-\label{sec:orgc4c52f9}
+\label{sec:org387cbe4}
 スケッチ->単色で塗りつぶし\\
 
 \begin{itemize}
@@ -101,7 +101,7 @@
 \end{itemize}
 
 \subsection{機械学習ベースの自動着彩}
-\label{sec:orge934f22}
+\label{sec:orgf40f82f}
 スケッチ->カラー画像 or グレースケール画像->カラー画像\\
 Scribbler はざっくり言うと、encoder-decoder型のGenerator＋GANsのDiscriminatorのような形を取っています。この部分の研究だと、敵対性ネットワークを用いるのがデフォルトという感じになるようです。\\
 
@@ -143,7 +143,7 @@ Scribbler はざっくり言うと、encoder-decoder型のGenerator＋GANsのDis
 \end{itemize}
 
 \subsection{画像のスタイル変換}
-\label{sec:org6fa9847}
+\label{sec:org094c7dc}
 画像のスタイル変換もスケッチ->カラー画像に使えるので関連研究として取り上げられています。\\
 
 \begin{itemize}
@@ -177,7 +177,7 @@ GANsを用いた画像のスタイル変換に関する論文。教師あり学�
 \end{itemize}
 
 \subsection{画像の色付け}
-\label{sec:orgaefc167}
+\label{sec:org95a6be9}
 \begin{itemize}
 \item \href{http://iizuka.cs.tsukuba.ac.jp/projects/colorization/ja/}{Let there be Color!}\\
 
@@ -197,11 +197,11 @@ GANsを用いた画像のスタイル変換に関する論文。教師あり学�
 \end{itemize}
 
 \section{モデル概要}
-\label{sec:org7fb0adb}
+\label{sec:org00cd357}
 論文では、提案手法の概要から2段階のステップそれぞれの構成、そして訓練データの作成手法についての説明がなされています。これらをざっくりと消化していきます。特に訓練データの作成・獲得手法については \textbf{pixiv のサーバダウンを狙ってスクレイピングアタック仕掛けている新進気鋭超頭脳AI研究者様} には見ていただきたいものですね。(\texttt{界隈や大学の印象悪くなるからやめてくれ})\\
 
 \subsection{OverView}
-\label{sec:orgb378382}
+\label{sec:orgdbd23e9}
 2段階なフレームワークである本手法は、 \textbf{drafting stage} と \textbf{refinement stage} という名前で2つを区別しています。入力のスケッチと最初に与えられるユーザの指示を元に色の構成を決めて、ぱっと色付けをすることが drafting stage での目標になります。そして refinement stage では drafting stage での drafting stage で得られた画像について不正確な色の領域を識別して、追加のユーザからの指示群を元に改良します。これら2つの stage に対するモデルは別々に訓練されており、実際に検証を行う際に初めて接続され最終出力までを得ることが出来ます。以下の図 Fig. 3 がフレームワークの全体図です。この 2段階なフレームワークは複雑な着彩タスクをよりシンプルで目標が明確であるサブタスクに分割したことで、結果的にスケッチと着彩までの距離を狭めます。さらに学習が容易になり、着彩結果の品質が向上します。一方既存の1段階な着彩手法では学習が困難であるために、不自然な着彩に対する修正を行うことが出来ません。\\
 
 訓練に際して \textbf{着彩済みなデータセット} として目をつけたものは \href{https://www.gwern.net/Danbooru2018}{Danbooru database} でした。これに対するスケッチの獲得は、PaintsChainer による線画抽出システムを用いました。またユーザからの入力(指示)をシミュレートするには、\href{https://arxiv.org/pdf/1705.02999.pdf}{Real-Time User-Guided Image Colorization with LearnedDeep Priors.} に用いられている手法を用いました。drafting と refinement 両方で用いられている本質的な手法は、 \textbf{GANs} です。Fig. 4 をみると、stacking layer と layer のサイズ、layer 間の接続方式についてわかると思います。訓練時にはおおよそ Adam Optimizerを用いています(where \(\beta_1 = 0.9, \beta_2 = 0.99, lr=1e-5\))。訓練に用いた GPU は Tesla P100 で、バッチサイズは 16 でした(バッチサイズを上げると学習率を下げずに訓練がうまく行く、という論文を google が出していたはずなので、より強いGPU使って上げてみたいですね。)トレーニングのサンプルデータは、元画像から \(224 \times 224\) のサイズのパッチにトリミングされます。とはいえ提案手法のモデルは \href{https://esslab.jp/\~ess/ja/research/sketch/}{Fully Convolutional Network} で構成されているので、本フレームワークの検証段階では \textbf{任意の入力サイズをサポートできる} ようになっています。\\
@@ -218,7 +218,7 @@ GANsを用いた画像のスタイル変換に関する論文。教師あり学�
 \caption{Fig.4 論文より引用}
 \end{figure}
 \subsection{drafting stage}
-\label{sec:org3f35900}
+\label{sec:org1a43e65}
 この stage では入力データであるスケッチから大まかな全体の色構成を決定するという目的で学習されます。高品質な画像を求めているわけではなく、色の多様性を保証できるだけ、ユーザの指示に基づいた色を積極的に散らすことが出来る必要があります。このためにスケッチ \(x\) と \(u_i\) から大まかな画像 \(\hat{y}_m\) を予測するネットワーク network G を提案しています。これの概要は Fig.4 (a)にあります。この大まかながぞうのせいせいについては PaintsChainer など他手法が存在していますが、これらは技術的詳細が明らかにされていません。しかし実験の結果、本手法はそれらと同等以上の性能(state-of-art な性能)が得られることがわかりました。\\
 
 スケッチ \(x\) とユーザの指示 \(u_i\) を入力に、 \(G(x, u_i)\) で表される FFN (feed-forward network) で 予測画像 \(\hat{y}_m\) を出力します。最適化のための目的関数は次の式 (1) になります(概形は \textbf{1ノルム} と \textbf{色彩多様性確保のための補正項} 、そして \textbf{GANs} ですね)。\\
@@ -234,7 +234,7 @@ m &=& image\ width\ \times \ height \nonumber
 損失関数 L では生成される \textbf{色彩のRGB空間における分散を高める効果} を担っており、これによってより \textbf{彩度の高い色をもった} 画像が生成できるようになります。\\
 
 \subsection{refinement stage}
-\label{sec:org481993a}
+\label{sec:orgd6e5ff1}
 drafting stage によって得られた画像はまだ色間違いや不自然な部分(英語でこれは artifact と言われます)があるため、実用的ではありません。これを修正するために、修正箇所の領域を特定し、それを修正します。このために本フレームワークではユーザから修正箇所の指摘を受けるという仕組みを取っており、その意図を汲み取り制御することが必要になります。これを他制するために、問題点のある色領域を特定・修正するための別の深層学習モデルを提案しました。このモデルはユーザの指示を受け取り、それに従って色間違いや不自然な部分が修正されます。\\
 
 ところがこのような訓練データを作成することは難しいです。選択肢としては神絵師を札束で殴りつけて draft 画像を修正された画像にしてもらうことですが、これは金も時間もやっべえかかります。またそれによってコンテンツの多様性を確保することも難しいでしょう(神絵師を大量に雇えば良いでしょうが以下略)。あるいは drafting stage から画像を大量に生成してそれを用いるという手法が考えられますが、これを行うと、特定の drafting 画像 に対して過剰適合してしまう可能性があり汎化性能を失う可能性があります。また drafting stage の結果を用いるということはせっかく \textbf{意図的に2つのタスクに分けた} ものをまとめて訓練してしまっていることになることと同義になるので、望ましいものとは思えません。実際に分離したほうがうまく行くことは、本手法の結果を見ればわかります(実際に drafting stage の画像を用いた refinement stage の学習は提案手法に比べ悪い結果が出ています)。\\
@@ -258,7 +258,7 @@ drafting stage によって得られた画像はまだ色間違いや不自然�
 以降ではこの3点に従うような画像を生成するための手法を説明します。\\
 
 \subsubsection{ランダムな領域切り出しと貼り付け}
-\label{sec:org96f38fc}
+\label{sec:org4169c77}
 色の間違いをシミュレートするために、カラー画像からランダムに長方形のパッチを切り出します。パッチのサイズは \(64\times 64 \sim 256 \times 256\) の範囲内で、これは一様分布からサンプリングされます。また色の間違いのランダム性と多様性を確保するために、不規則な形状のパッチを得ることができる領域提案法(region proposal methods)を用います。領域は入力画像のエッジマップに基づいて抽出されます。まず、ガウスぼかしをかけた画像と元の画像の差を求め、結果をクリッピングすることでシャープでクリーンなエッジマップを得ます。次に取得したエッジマップを平均値に基づいたしきい値に従って2値化エッジとして再抽出します。最後に不規則な形状のパッチを抽出するための色領域マスクを得るために \href{https://arxiv.org/pdf/1706.06918.pdf}{Trapped-ball segmentation} を実装しました。(\href{https://github.com/pfnet/PaintsChainer/issues/127}{Trapped-ball Segmentationについての議論})\\
 
 これらの2つの方法を組み合わせて、全部で10,000 の異なる画像を抽出します。色の誤りをシミュレートするために、これらのパーツをランダムに回転させて絵の上に重ねて貼り付けます。\\
@@ -266,11 +266,11 @@ drafting stage によって得られた画像はまだ色間違いや不自然�
 つまり簡単に言うと、いい感じに学習データからパーツを持ってきて、画像 \(y\) に対して適当に貼り付けることで合成画像 \(y'\) を得ます。\\
 
 \subsubsection{ランダムな変形}
-\label{sec:org1d6e8ca}
+\label{sec:org0fb96dc}
 変形を行うことで、ぼやけと歪みをシミュレートします。まず \([0, 0.1^2]\) 以内の正規分布から得られる乱数 \(\theta_{mn}\) を値に持つ \(2\times 3\) 行列 \(T_{\theta}(G)\) を生成します。次に \href{https://papers.nips.cc/paper/5854-spatial-transformer-networks.pdf}{Spatial Transform Layer} (STL) (\href{https://qiita.com/nkato\_/items/125bd2e7c0af582aa32e}{解説})を用いて画像を変形します(STLはどっちかっていうと正規化の手法なんですが、これはとてもユニークな発想ですね、多分)。この変形によって、局所パターンをぼかすことが出来るのと同時に、全体的なノイズ付加ができます。この場合のノイズとは恐らく特徴がボケる、という意味で、画像がぼやける、という意味とはニュアンスが違います。\\
 
 \subsubsection{ランダムな色のスプレー}
-\label{sec:orge72b8bb}
+\label{sec:org1a522d1}
 画像の上にランダムな色をスプレーすることで、色の染み出しをシミュレートします。まず画像内からランダムな色を取り出します。次にいくつかのランダムな線形のパスに従ってランダムに決められた幅 \(r \sim uniformly\ distribution \in [64, 128]\) でスプレーします。スプレーの形状は、色の染み出しに似た形状のものを選択しています。\\
 
 \begin{figure}[htbp]
@@ -279,7 +279,7 @@ drafting stage によって得られた画像はまだ色間違いや不自然�
 \caption{Fig.7 論文より引用}
 \end{figure}
 \subsubsection{モデルの最適化}
-\label{sec:org3bfdcb4}
+\label{sec:org098118c}
 上記の3つの方法を同時に適用することで、draft 画像 \(y_m\) を合成します。スケッチ \(x\) 、 ユーザの指示 \(u_{ii}\) 、 元の画像 \(y_f\)   に対して以下の目的関数を使い学習を行います(\(\lambda = 0.01\))。前の項が GANs のそれで、後の項は1ノルム(MAE, mean absolute error)ですね。 \(y_m\) に関する Encoder の初期の重みとして、 ImageNet の inception V1 を与えました。\\
 
 \begin{eqnarray}
@@ -287,25 +287,25 @@ arg \min_{G} \max_{D} \mathbb{E}_{x, u_{ii}, y_m, y_f \sim P_{data}(x, u_{ii}, y
 \end{eqnarray}
 
 \section{評価}
-\label{sec:org4ffe93f}
+\label{sec:org18ed683}
 性能評価を行うために、まずテストデータセットを用意する必要がありました。このデータセットはインターネットより収集した様々な絵師からの 53 のスケッチで構成されています。スケッチの内容は、人のキャラクタ、動物、植物、風景など多岐にわたります。テストデータセットが学習データに含まれないことを確かにするために、すべてのテストデータを学習データと比較し、それぞれのテストデータに近い画像を上位3つずつ学習データから排除しました。尚画像の近さを測る指標は MSE(Mean Square Error) です。\\
 
 以降の部分は一部を省略しています。論文中の Figure を引用しすぎると翻訳権周りで揉めそうなので、ここでは簡潔にまとめたもので済ませています。概要はすべてまとめられたと思いますが、詳細は元論文を参照してください。\\
 
 \subsection{ユーザインターフェース}
-\label{sec:org227dc8f}
+\label{sec:orgc3e8981}
 より便利な着彩環境を構築するために、Fig. 2 のようにユーザが2段階の着彩処理を行うことを支援できるようなユーザインターフェースを設計しました。ユーザインターフェースには 3 つのキャンバスがあり、ツールバー、カラーパレット、そして最終結果のためのものとなっています。先行研究とは異なり、本手法は2段階の結果をそれぞれ別に示して、両方の段階に対するユーザからの指示を受け入れられるようにしました。実験の結果、両方に指示を受けられるようにしたことで、ユーザの着彩処理を高速化させることが出来るとわかりました。\\
 
 \subsection{見た目の比較}
-\label{sec:org63eeb72}
+\label{sec:orgf998d6a}
 まず最初の評価実験として、本手法と他手法との結果の差を視覚的に比較します。いくつかの手法はユーザから \textbf{線} を用いた指示に従って調整を行うが、他の手法では \textbf{点} を用いた指示に従って調整が行われる仕組みになっているので、我々は手動で線を用いた着彩の指示から手動でサンプリングを行ってそれぞれの手法のための適切な \textbf{点} の指示を作成しました。公正な比較を行うために、同一の指示マップが両方の段階で与えられています。異なる指示マップを用いると、結果の品質がより良くなるということに注意してください。\\
 
 \subsubsection{色伝搬手法}
-\label{sec:org12b0e21}
+\label{sec:org73153f5}
 色伝搬手法からの比較対象として、 \href{https://dcgi.fel.cvut.cz/home/sykorad/Sykora09-EG.pdf}{Lazy Brush} を取り上げました。 Fig.8 を見ればわかるように質感や陰影なしの平坦な色付けしか出来ていないことがわかります。また色滲みの問題も申告で、例えば蛇の塗りつぶしに至ってはその殆どが真っ黒になっていますし、髪飾りも同様な問題を抱えていることがわかります。しかし提案手法では、 Lazy Brush と比較して、質感や陰影を表現できている他、ユーザからの指示によって適切な色伝搬が出来ているとわかります。\\
 
 \subsubsection{機械学習ベースのスケッチの着彩手法}
-\label{sec:org73ad554}
+\label{sec:org2dd45ec}
 機械学習ベースの着彩手法として、Comicolorization と PaintChainer (V1 \textasciitilde{} V3) を取り上げました。しかし、\href{https://nico-opendata.jp/ja/casestudy/comicolorization/index.html}{Comicolorization}  はスケッチからの色付けに対応した手法ではないので、こちらではスケッチからおおよそグレースケールの着彩が施されています。PaintChainer はどのバージョンでも色滲みの問題があることがわかります。例えば蛇の画像や髪飾りは明らかに色が漏れていることがわかります。その上 V1 に関しては、水彩なぼやけを起こしていることがわかります。この特徴は特に彩度の低い色で見られるようです。V2 では色がよりはっきりとしてきていますが、質感生成の部分で難があるように思われます。例えば蛇の画像ではV1に比べて質感が薄いように見えます。少女の髪の塗りについては、細かい質感や陰影なしにほぼ無地に塗りつぶされていることがわかります。V3 では、質感や陰影の表現はある程度向上していますが、細部や線画歪んでしまっています。また髪飾りのようないくつかの細かい領域に関しては、彩度の高い色や歪んだ色で色付けされています。\\
 
 これに対して提案手法では、ユーザの指示に従って適切な領域に対して着彩を行えている他、ハイライトや乗算のようなレイヤー効果を出すことが出来ていると考えられます(レイヤー云々は絵を描かない人からはなんのこっちゃと思いますが、そういう分野なので諦めてください)。髪の毛や服は鮮やかな色でかつ滑らかなハイライトや影が表現できていることがわかります。蛇については先行研究で、まだらな質感を表現することに難航していましたが、提案手法ではうまく表現することが出来ていると思われます。また refinement stage で、PaintChainerが抱えていた色にじみの問題は解決していると言えます。\\
@@ -319,7 +319,7 @@ arg \min_{G} \max_{D} \mathbb{E}_{x, u_{ii}, y_m, y_f \sim P_{data}(x, u_{ii}, y
 また自動着彩、つまりユーザからの指示無しで着祭を行った場合の性能差について比較を行いました。これはユーザが着彩を行う際に何らかのインスピレーションを得たい場合などでの利用が想定されています(論文中 Fig. 9 参照)。PaintChainer V2, V3と、提案手法の自動着彩の性能を比較すると、PaintChainerでは Fig. 8 と同様に色にじみの問題が出ています。またユーザからの指示がないことで、誤った色や色が不自然に混ざってしまっている場面が見られます。提案手法ではこの状態から refinement stage に移ることが出来るため、このような不自然さを修正することが容易であると言えます。\\
 
 \subsubsection{画像スタイルの操作}
-\label{sec:org55c4c76}
+\label{sec:org72a261d}
 ここで用いる画像のスタイル操作、とは参照画像を元にスケッチに着彩を行うという意味です。我々の提案手法と、\href{https://www.cv-foundation.org/openaccess/content\_cvpr\_2016/papers/Gatys\_Image\_Style\_Transfer\_CVPR\_2016\_paper.pdf}{Image Style Transfer Using Convolutional Neural Networks} , \href{https://arxiv.org/pdf/1705.01088.pdf}{Visual attribute transfer through deep image analogy} , \href{https://arxiv.org/pdf/1706.03319.pdf}{Style Transfer for Anime Sketches with Enhanced Residual U-net and Auxiliary Classifier GAN} , \href{https://nico-opendata.jp/ja/casestudy/comicolorization/index.html}{Comicolorization} の4つを用いて比較実験を行いました。結果としてどれも提案手法に比べて、不自然な色を用いていたり、色にじみを起こしてしまっていることがわかりました。また提案手法では比較手法に比べて服の着彩がうまく行くことがわかりました。結果として言えることは、提案手法が半自動的な着彩で、参照画像すべての色を反映するわけではないものの、比較手法に比べて高品質な画像を生成することが出来るということです。\\
 
 \href{https://phillipi.github.io/pix2pix/}{Pix2Pix} のような画像から画像のスタイル変換を用いても勿論スケッチから画像を着彩することが出来ます。比較対象として \href{https://phillipi.github.io/pix2pix/}{Pix2Pix} を取り上げ実験しました。しかし Pix2Pix では低い彩度の画像しか生成できず、画像が滲んでしまいました(Fig. 13 参照)。\\
@@ -336,7 +336,7 @@ arg \min_{G} \max_{D} \mathbb{E}_{x, u_{ii}, y_m, y_f \sim P_{data}(x, u_{ii}, y
 \end{figure}
 
 \subsection{ユーザ実験}
-\label{sec:org8441dbf}
+\label{sec:org63565fc}
 提案手法の定量的な評価を得るために、ユーザ実験を行いました。ユーザエクスペリエンスと満足度を評価するために、10人の参加者を募って、作成したGUIソフトを用いてインタラクティブな着彩を行いました。比較対象は PaintsChainer ファミリーで、ランダムに選択された5つのスケッチのセットを着彩しました。参加者はどのようにも指示を行うことが出来ます。また参加者ごとにかかった着彩時間を記録しました。\\
 
 実験後、Fig. 14 に示されるような多次元的な調査を行いました。尚スコアは [0, 1] で正規化されます。また異なる手法間での有意性を検証するために paired student's の T検定 を行いました。結果を Table. 1 に示しました。\\
@@ -354,11 +354,11 @@ arg \min_{G} \max_{D} \mathbb{E}_{x, u_{ii}, y_m, y_f \sim P_{data}(x, u_{ii}, y
 \end{figure}
 
 \subsection{Discussions and Limitation}
-\label{sec:org8752a7c}
+\label{sec:org49d1ee3}
 To be Continued\ldots{}\\
 
 \section{感想}
-\label{sec:orgcf97d7c}
+\label{sec:org5efd5f8}
 僕はあんまり画像系の研究はしていないんですが、この論文はとても読みやすい部類であったと思います。最近読んだ \href{https://arxiv.org/abs/1904.09571}{TransGaGa} の技術を組み合わせるとか \href{https://arxiv.org/abs/1807.03039}{Glow} や U-Net を参考に Fully Connected Network の構築手法をアップデートする(特に refinement stage の ユーザの指示と画像の組み合わせ部分を TransGaGa の CVAE 項みたいにしてみたら面白そうですね)とか、Refinement Stage を強化学習の分野に持ち込んでみるとか、自動画像生成の部分をもっと詰めてみるとか、色々研究していみたいテーマが見える面白い分野だなぁと思いました。（小並感）\\
 
 ところでこの論文を読む限り End-to-End 学習には難がありそうなイメージになっているんですが、最近のトレンド的にどうなんでしょう。\\
