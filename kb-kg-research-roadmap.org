@@ -36,7 +36,8 @@
 
 ** Towards a Definition of Knowledge Graphs 
    knowledge graph の定義についての論文。knowledge graph が研究やビジネスの場に上がってきているものの、それはknowledge graph の一部のみを指すことが多いため、この用語の定義をしなければならないとしている。以下 abstract の意訳。
-   
+
+#+begin_quote   
    一般に彼らが、knowledge graph としてみなしているものは、 semantic web technologies (意味論的Web 技術…？)、linked data (おそらくSEOや推薦アルゴリズムなどを指している)、large-scale data analytics (大規模データ解析)、 cloud computing である。彼らが knowledge graph の例として取り上げている人気の、そして影響力のあるものは Google Knowledge Graph(2012) であり、これを受けて彼らは特に定義することなくKnowledge Graphというものを研究してきた。
    
    しかし Knowledge Graph に多義的な解釈が存在しているせいで、これの発展は阻害され続けてきている。多くの研究論文は、Google Knowledge Graph を参考にしていますが、Google Knowledge Graph自身で使われている技術に関して公式な文書は存在しない。
@@ -44,11 +45,12 @@
    我々はコンセプトや技術を学術及び商業の舞台で広めていくための理想的な前提条件として、曖昧さのないある特定の定義が必要であると考えている。よって本論文では、この曖昧さを残してきた歴史とその多義性を考慮しつつ、Knowledge Graph とはなにかを定義するために議論する。
    
    本論文の目標は、この話題についての議論の基礎として機能すること、彼らのKnowledge Graph に関するビジョンの共通項を見出し彼らに貢献できる Knowledge Graph の定義を提案することだ。
-
+#+end_quote
 
   
 ** DeepDive
    半手動 knowledge base 構築システムについての論文。読むのは全体の論文ではなく(205ページあるので時間が足りない)、その要約の論文。
+
 
    DeepDive は専門家 (domain expert) からのルールや修正を反映して自動的に entity 間の relation を取り出し、それを knowledge base の形に落とし込む (Gibbs sampling などを使って relation を周辺化するようだ)。既存研究と比較したいところは、これは自動的に knowledge base を作りたいわけではなく、例えばIBM Watson のような人力の作業を含む knowledge base 作成のコンテクストで、どれだけ人力を必要な部分ににのみ割り当てることができるか、という問題を最適化するための枠組みであるという点だろう。
 
