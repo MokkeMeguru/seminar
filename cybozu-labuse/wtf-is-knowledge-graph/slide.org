@@ -1,0 +1,48 @@
+#+TITLE: Knowledge Graph とはなにか (1)
+#+AUTHOR: MokkeMeguru
+# This is a Bibtex reference
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:t arch:headline ^:nil
+#+OPTIONS: author:t broken-links:nil c:nil creator:nil
+#+OPTIONS: d:(not "LOGBOOK") date:nil e:nil email:nil f:t inline:t num:t
+#+OPTIONS: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+OPTIONS: timestamp:nil title:t toc:nil todo:t |:t
+#+LANGUAGE: ja
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 26.2 (Org mode 9.2.3)
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [a4paper, dvipdfmx, 10pt]
+#+LATEX_HEADER: \usepackage{amsmath, amssymb, bm}
+#+LATEX_HEADER: \usepackage{graphics}
+#+LATEX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \usepackage{times}
+#+LATEX_HEADER: \usepackage{longtable}
+#+LATEX_HEADER: \usepackage{minted}
+#+LATEX_HEADER: \usepackage{fancyvrb}
+#+LATEX_HEADER: \usepackage{indentfirst}
+#+LATEX_HEADER: \usepackage{pxjahyper}
+# #+LATEX_HEADER: \hypersetup{colorlinks=false, pdfborder={0 0 0}}
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage[backend=biber, bibencoding=utf8]{biblatex}
+#+LATEX_HEADER: \usepackage[top=20truemm, bottom=25truemm, left=25truemm, right=25truemm]{geometry}
+#+LATEX_HEADER: \usepackage{ascmac}
+#+LATEX_HEADER: \usepackage{algorithm}
+#+LATEX_HEADER: \usepackage{algorithmic}
+#+LATEX_HEADER: \addbibresource{/home/meguru/Github/private-Journal/research-plan/reference.bib}
+#+DESCRIPTION:
+#+KEYWORDS:
+#+STARTUP: indent overview inlineimages
+* 導入
+#+BEGIN_QUOTE
+対話システムなんもわからん
+#+END_QUOTE
+
+対話システムとはなんぞやという疑問を持ち始めてはや数年、未だによくわからず、最近は画像やらに TF2.0betaの勉強やらに逃げている今日この頃でございます。
+
+しかしながらいずれかはやらなければならないわけで、よし、やってみるかとまず手を付けてみたのがまず *Knowledge Base* というものでした。こいつはどこで役に立つのかというと、[[https://qiita.com/MeguruMokke/items/83b3d921729b62ae8ee2][以前書いたAmazon Alexa の内部システムについての記事]] や [[https://qiita.com/MeguruMokke/items/6e5d7997f4df7f08030d][以前書いた対話システム今についての記事]] の話で登場する、 *対話システムにおける回答の核を作る* 部分となります。
+
+具体的に例を挙げるために X さんが対話システム Alice に 「令和0年時の日本の首相はだれ？」というような質問をしたとします。すると Alice は Language Understanding を経由することで、「<request_who, who=首相, when=日本, when=令和0年>」というようなクエリに変換します(この辺りはTOEICの長文問題を想起しますね)。次に Alice は Dialog Management はこのクエリを受け取り、 *Knowledge Base* に回答を問い合わせます。すると Knowledge Base はそこから 「<answer=安倍>」みたいなものを返します。この結果を元に Natural Language Generation は自然な文 「その首相の名は、安倍さんだと思いますにゃん」を生成します。これを X さんは音声ないしテキストで Alice から受け取る、という仕組みになっています。(実際はそれぞれもっと色々やっています)
+
+そんなわけでパット見一番重要そうな *Knowledge Base* をやってみよう、ということになったのですが、どうやらこいつ、 *かなりふわっとしている* っぽい。言い換えると *定義がよくわかんない* 。特に *Knowledge Base* と *Knowledge Graph* の違いがわからん。
+
+そんなわけで良い記事を探して三千里していたところ見つけたのが、この記事、[[https://hackernoon.com/wtf-is-a-knowledge-graph-a16603a1a25f][WTF is a knowledge graph?]] とこの記事で引用されている論文 [[http://ceur-ws.org/Vol-1695/paper4.pdf][Towards a Definition of Knowledge Graphs ]] となります。
