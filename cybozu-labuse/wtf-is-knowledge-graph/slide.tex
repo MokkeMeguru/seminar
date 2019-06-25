@@ -1,0 +1,110 @@
+% Intended LaTeX compiler: pdflatex
+\documentclass[a4paper, dvipdfmx, 10pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{minted}
+\usepackage{amsmath, amssymb, bm}
+\usepackage{graphics}
+\usepackage{color}
+\usepackage{times}
+\usepackage{longtable}
+\usepackage{minted}
+\usepackage{fancyvrb}
+\usepackage{indentfirst}
+\usepackage{pxjahyper}
+\usepackage[utf8]{inputenc}
+\usepackage[top=20truemm, bottom=25truemm, left=25truemm, right=25truemm]{geometry}
+\usepackage{ascmac}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\author{MokkeMeguru}
+\date{}
+\title{Knowledge Graph とはなにか (1)}
+\hypersetup{
+ pdfauthor={MokkeMeguru},
+ pdftitle={Knowledge Graph とはなにか (1)},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 26.2 (Org mode 9.2.3)}, 
+ pdflang={Ja}}
+\begin{document}
+
+\maketitle
+\section{導入}
+\label{sec:org12aa143}
+\begin{quote}
+対話システムなんもわからん\\
+\end{quote}
+
+対話システムとはなんぞやという疑問を持ち始めてはや数年、未だによくわからず、最近は画像やらに TF2.0betaの勉強やらに逃げている今日この頃でございます。\\
+
+しかしながらいずれかはやらなければならないわけで、よし、やってみるかとまず手を付けてみたのがまず \textbf{Knowledge Base} というものでした。こいつはどこで役に立つのかというと、\href{https://qiita.com/MeguruMokke/items/83b3d921729b62ae8ee2}{以前書いたAmazon Alexa の内部システムについての記事} や \href{https://qiita.com/MeguruMokke/items/6e5d7997f4df7f08030d}{以前書いた対話システム今についての記事} の話で登場する、 \textbf{対話システムにおける回答の核を作る} 部分となります。\\
+
+具体的に例を挙げるために X さんが対話システム Alice に 「令和0年時の日本の首相はだれ？」というような質問をしたとします。すると Alice は Language Understanding を経由することで、「<request\_who, who=首相, when=日本, when=令和0年>」というようなクエリに変換します(この辺りはTOEICの長文問題を想起しますね)。次に Alice は Dialog Management はこのクエリを受け取り、 \textbf{Knowledge Base} に回答を問い合わせます。すると Knowledge Base はそこから 「<answer=安倍>」みたいなものを返します。この結果を元に Natural Language Generation は自然な文 「その首相の名は、安倍さんだと思いますにゃん」を生成します。これを X さんは音声ないしテキストで Alice から受け取る、という仕組みになっています。(実際はそれぞれもっと色々やっています)\\
+
+そんなわけでパット見一番重要そうな \textbf{Knowledge Base} をやってみよう、ということになったのですが、どうやらこいつ、 \textbf{かなりふわっとしている} っぽい。言い換えると \textbf{定義がよくわかんない} 。特に \textbf{Knowledge Base} と \textbf{Knowledge Graph} の違いがわからん。\\
+
+そんなわけで良い記事を探して三千里していたところ見つけたのが、この記事、\href{https://hackernoon.com/wtf-is-a-knowledge-graph-a16603a1a25f}{WTF is a knowledge graph?} とこの記事で引用されている論文 \href{http://ceur-ws.org/Vol-1695/paper4.pdf}{Towards a Definition of Knowledge Graphs } となります。\\
+
+\section{Google Knowledge Graph}
+\label{sec:org6e9c8cf}
+Knowledge Graph の研究に最も影響を与えたそれは、おそらく Google Knowledge Graph でしょう。実際 Knowledge Graph をぱっと調べるとこの製品についてレコメンドされると思います。\\
+
+お使いの (特にPC/Macの) Google Chrome / Chromium / Canary で著名人の名前を検索すると左側に出てくるあれです。2012年に \href{https://googleblog.blogspot.co.uk/2012/05/introducing-knowledge-graph-things-not.html}{Google が公表した Knowledge Graph に関する記事} は以下のようにして Knowledge Graph を定義しています。\\
+
+\begin{quote}
+\ldots{} we've been working on an intelligent model - in geek-speak, a 'graph' -  that understands real-workd entities and their relationships to one another: things, not strings.\\
+私達は現実の実体とそれらの相互関係、つまり文字列としてのそれではなく事物としてのそれを理解する知能モデルについて取り組んできました。そのモデルは、オタクっぽく表現するならばグラフです。\\
+\end{quote}
+
+この声明は全くと言って良いほどに Google Knowledge Graph の動作やその詳細については触れられていません。しかしこれは Wikipedia などの大規模な公開されている資源や、(おそらく)我々の検索履歴などを利用していると想定されており、それは700億のエッジを持った複雑なグラフ構造(2016年度)であるらしいと \href{http://www.theverge.com/2016/10/4/13122406/google-phone-event-stats}{言われています}。\\
+
+\section{Knowledge Graph の定義}
+\label{sec:org71d77e0}
+Google Knowledge Graph という製品から、一般的な Knowledge Graph に話題を戻しましょう。Wikipedia 自体にそのリンクは(この記事が書かれた当時)なく、代わりに以下の2つのページがヒットします。\\
+
+\begin{itemize}
+\item \href{https://en.wikipedia.org/wiki/Ontology\_(information\_science)}{ontology(オントロジー)} に関するページ。狂気的なほどに複雑です。\\
+\item \href{https://en.wikipedia.org/wiki/Semantic\_network}{semantic network(意味ネットワーク)} に関するページ。触れたくもありません。\\
+\end{itemize}
+
+まあ、これらの記事から推察するに、どうやら Knowledge Graph というものは意味論的なコンテクストで行われるデータの結合についての技術的産物、つまりグラフ構造をベースとした知識の表現手法の一種であるらしいです。 \textbf{しかしこれでは明瞭な解釈とは言えないでしょう。}\\
+
+ラッキーなことに、この意識は他の研究者達も持っているようで、Knowledge Graph の定義に関する \href{http://ceur-ws.org/Vol-1695/paper4.pdf}{論文} が発表されていました。この論文では "勿論他の解釈もあるかもしれないが" と様々な意見に留意した上で、それらの意見を集計した上で発表しています。\\
+
+
+\subsection{Knowledge Graph Refinement: A Survey of Approaches and Evaluation Methods の場合}
+\label{sec:orge868152}
+\begin{quote}
+A knowledge Graph mainly describes real world entities and their interrelations, organized in a graph, defines possible classes and relations of entities in a schema,  allows for potentially interrelation arbitrary entities with each other and covers various topical domains.\\
+\end{quote}
+
+
+Knowledge Graph は、主に現実の実体らの相互関係をグラフで整理し、実体に関する関係とクラス関係(親/子のようなもの？)をスキーマを用いて定義し、相互に関係のある任意のエンティティを互いに関連付けることを可能にし、様々な話題のドメインをカバーすることができるものです。\\
+
+\subsection{Journal of Web Semantics: Special Issue on Knowledge Graphs の場合}
+\label{sec:org29209ca}
+\begin{quote}
+Knowledge graphs are large network of entities, their semantic types, properties,  and relationships between entities.\\
+\end{quote}
+
+Knowledge Graph は実体自身について、あるいは実体に関する意味論的な型、実体の性質、実体同士の関係についてを表現した大規模ネットワークである。\\
+
+\subsection{From Taxonomies over Ontologies to Knowledge Graphs の場合}
+\label{sec:org394dee3}
+\begin{quote}
+We define a Knowledge Graph as an RDF graph. An RDF graph consists of a set of RDF triples where each RDF triple (s, p, o) is and ordered set of the following RDF terms: a subjects \(\in\) \\
+\end{quote}
+\(\in\) \\
+\end{document}
