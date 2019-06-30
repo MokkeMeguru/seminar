@@ -56,6 +56,7 @@
    [[http://www.vldb.org/pvldb/vol8/p1310-shin.pdf][参考文献(逐次更新に関するアルゴリズム)]]
    [[http://deepdive.stanford.edu/distant_supervision][distant supervision]]]
    [[https://ipsj.ixsq.nii.ac.jp/ej/index.php?active_action=repository_view_main_item_detail&page_id=13&block_id=8&item_id=190358&item_no=1][読みたい論文(有料)]]
+   [[https://www.fujixerox.co.jp/company/technical/tr/2014/pdf/s_08.pdf][tea break]]
 ** 深層学習
    DeepDiveで登場したGibbs Sampling がなぜ knowledge graph の構築に役立つのか、という疑問を解消するために、手元にある書籍を参照したところ、Gibbs Sampling に関する内容があったため、読む。
    
