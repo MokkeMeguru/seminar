@@ -53,6 +53,7 @@
    DeepDive は専門家 (domain expert) からのルールや修正を反映して自動的に entity 間の relation を取り出し、それを knowledge base の形に落とし込む (Gibbs sampling などを使って relation を周辺化するようだ)。既存研究と比較したいところは、これは自動的に knowledge base を作りたいわけではなく、例えばIBM Watson のような人力の作業を含む knowledge base 作成のコンテクストで、どれだけ人力を必要な部分ににのみ割り当てることができるか、という問題を最適化するための枠組みであるという点だろう。
 
    [[https://cs.stanford.edu/people/chrismre/papers/deepdive_highlight.pdf][url]]
+   [[http://www.vldb.org/pvldb/vol8/p1310-shin.pdf][参考文献(逐次更新に関するアルゴリズム)]]
 ** 深層学習
    DeepDiveで登場したGibbs Sampling がなぜ knowledge graph の構築に役立つのか、という疑問を解消するために、手元にある書籍を参照したところ、Gibbs Sampling に関する内容があったため、読む。
    
