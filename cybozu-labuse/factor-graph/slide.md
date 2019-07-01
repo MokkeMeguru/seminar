@@ -17,11 +17,11 @@ DeepDiveの論文を徒然なるままに読んでいたところ、ふと facto
 
 -   有向グラフィカルモデル(信念ネットワーク、ベイジアンネットワーク、directed graphical model, belief network, Bayesian network)  
     
-    ![img](../img/directed_graphical_model.svg)
+    ![img](../img/directed_graphical_model.png)
 
 -   無向グラフィカルモデル(マルコフ確率場、マルコフネットワーク、undirected graphical model, Markov random fields, Markov network)  
     
-    ![img](../img/undirected_graphical_model.svg)
+    ![img](../img/undirected_graphical_model.png)
 
 
 # 無向グラフモデル
@@ -44,7 +44,7 @@ DeepDiveの論文を徒然なるままに読んでいたところ、ふと facto
 
 つまり非正規化確率分布は、すべての \(\mathcal{C}\) の因子の積で表されるので、非負となります。これは理論的な解析を行う際に便利であることが知られているので、因子に非負制約がかかります。  
 
-![img](../img/unnormalized_prob_dist.svg)  
+![img](../img/unnormalized_prob_dist.png)  
 
 例として上の無向グラフを考えると、 \(\tilde{p}(\bm{x}) = \tilde{p}(a, b, c, d)= \phi_{a, b}(a, b) \phi_{b, c}(b, c) \phi_{b, d}(b, d)\) となります。  
 
@@ -80,7 +80,7 @@ where\ E(\bm{x}) &is\ energy\ function\\
 
 実際にエネルギーベースモデルを用いて、先程の非正規化確率分布を示すと、 \(E(\bm{x}) = E(a, b, c, d) = E_{a, b}(a, b) + E_{b, c}(b, c) + E_{b, d}(b, d)\) となる。  
 
-![img](../img/unnormalized_prob_dist.svg)  
+![img](../img/unnormalized_prob_dist.png)  
 
 ここで、 \(\phi\) 関数を対応する負のエネルギー指数関数にすると、  
 

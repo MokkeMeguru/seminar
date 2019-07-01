@@ -45,7 +45,7 @@
   構造化モデルには以下の2種類が存在しています。今回触れるのはそのうちの後者、無向モデルです。
 
   - 有向グラフィカルモデル(信念ネットワーク、ベイジアンネットワーク、directed graphical model, belief network, Bayesian network)
-    #+begin_src dot :file ../img/directed_graphical_model.svg
+    #+begin_src dot :file ../img/directed_graphical_model.png
     digraph G {
     graph [
       rankdir = LR,
@@ -59,11 +59,11 @@
     #+end_src
 
     #+RESULTS:
-    [[file:../img/directed_graphical_model.svg]]
+    [[file:../img/directed_graphical_model.png]]
 
   - 無向グラフィカルモデル(マルコフ確率場、マルコフネットワーク、undirected graphical model, Markov random fields, Markov network)
 
-    #+begin_src dot :file ../img/undirected_graphical_model.svg
+    #+begin_src dot :file ../img/undirected_graphical_model.png
     graph G {
     graph [
     rankdir = LR,
@@ -77,7 +77,7 @@
     #+end_src
 
     #+RESULTS:
-    [[file:../img/undirected_graphical_model.svg]]
+    [[file:../img/undirected_graphical_model.png]]
 
 * 無向グラフモデル
   無向グラフモデルとは、無向グラフ $\mathcal{G}$ で定義された構造化確率モデルです。
@@ -98,7 +98,7 @@
   
   つまり非正規化確率分布は、すべての $\mathcal{C}$ の因子の積で表されるので、非負となります。これは理論的な解析を行う際に便利であることが知られているので、因子に非負制約がかかります。
   
-  #+begin_src dot :file ../img/unnormalized_prob_dist.svg
+  #+begin_src dot :file ../img/unnormalized_prob_dist.png
   graph G{
   graph [
     rankdir = LR,
@@ -110,7 +110,7 @@
   #+end_src
 
   #+RESULTS:
-  [[file:../img/unnormalized_prob_dist.svg]]
+  [[file:../img/unnormalized_prob_dist.png]]
 
   例として上の無向グラフを考えると、 $\tilde{p}(\bm{x}) = \tilde{p}(a, b, c, d)= \phi_{a, b}(a, b) \phi_{b, c}(b, c) \phi_{b, d}(b, d)$ となります。
   
@@ -147,7 +147,7 @@
   
   実際にエネルギーベースモデルを用いて、先程の非正規化確率分布を示すと、 $E(\bm{x}) = E(a, b, c, d) = E_{a, b}(a, b) + E_{b, c}(b, c) + E_{b, d}(b, d)$ となる。
   
-  [[file:../img/unnormalized_prob_dist.svg]]
+  [[file:../img/unnormalized_prob_dist.png]]
 
   ここで、 $\phi$ 関数を対応する負のエネルギー指数関数にすると、
            
