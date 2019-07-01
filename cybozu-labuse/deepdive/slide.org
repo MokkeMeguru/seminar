@@ -115,5 +115,5 @@ DeepDiveではこれらの方のオブジェクトをデータベースの relat
   #+caption: Figure 2.3 DeepDive より引用
 [[../img/deepdive_factor_graph.png]]
 
-  ユーザリレーションのそれぞれのタプル $R_i \in \mathcal{R}$ は $\mathbb{D}$ より一意にIDが割り振られており、Boolean を示す $\mathbb{V}$ から値を割り振られています。$\mathbb{B}$ はタプルの存在をモデリングするか、$R_i$ の特別な属性をモデリングするために付与されています。
+  ユーザリレーションのそれぞれのタプル $R_i \in \mathcal{R}$ は $\mathbb{D}$ より一意にIDが割り振られており、Boolean を示す $\mathbb{V}$ から値を割り振られています。$\mathbb{V}$ はタプルの存在をモデリングするか、$R_i$ の特別な属性をモデリングするために付与されています。
 * TODO Distant Supervision
