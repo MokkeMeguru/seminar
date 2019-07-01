@@ -10,6 +10,7 @@
 
 具体的に例を挙げるために X さんが対話システム Alice に 「令和0年時の日本の首相はだれ？」というような質問をしたとします。すると Alice は Language Understanding を経由することで、「<request\_who, who=首相, when=日本, when=令和0年>」というようなクエリに変換します(この辺りはTOEICの長文問題を想起しますね)。次に Alice は Dialog Management はこのクエリを受け取り、 **Knowledge Base** に回答を問い合わせます。すると Knowledge Base はそこから 「<answer=安倍>」みたいなものを返します。この結果を元に Natural Language Generation は自然な文 「その首相の名は、安倍さんだと思いますにゃん」を生成します。これを X さんは音声ないしテキストで Alice から受け取る、という仕組みになっています。(実際はそれぞれもっと色々やっています)  
 
+
 そんなわけでパット見一番重要そうな **Knowledge Base** をやってみよう、ということになったのですが、どうやらこいつ、 **かなりふわっとしている** っぽい。言い換えると **定義がよくわかんない** 。特に **Knowledge Base** と **Knowledge Graph** の違いがわからん。  
 
 そんなわけで良い記事を探して三千里していたところ見つけたのが、この記事、[WTF is a knowledge graph?](https://hackernoon.com/wtf-is-a-knowledge-graph-a16603a1a25f) とこの記事で引用されている論文 [Towards a Definition of Knowledge Graphs ](http://ceur-ws.org/Vol-1695/paper4.pdf) となります。  
