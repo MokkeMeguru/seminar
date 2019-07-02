@@ -66,7 +66,7 @@
   KG creation task の性能評価としては T2KG フレームワークの各段階にについてそれぞれ行いました。更に knowledge population task については T2KG の実証的な研究を行いました。KG creation task とknowledge population task との違いは、KG creation task では KG の構築を考慮するのに対して、 knowledge population taskでは与えられた KG に triple を取り込むというタスクになっている、という点です。
   #+END_QUOTE
   
-* T2KG のアーキテクチャ  
+* T2KG のアーキテクチャ 
   もう少し何ができるかをわかりやすくするために、ここで簡単に T2KG のアーキテクチャをさらっと眺めて見ましょう。
  
   #+caption: Fig. 1 論文より引用
@@ -80,4 +80,94 @@
 
   右上の Text（Natural Language Text）と Knowledge Graph は、中央の Text Triples をより高品質なものにするために用いられるデータです。どちらも先述のそれらと同一のものと捉えても問題ないようです。
 
-* 
+  次に上の図から、次の 5つのコンポーネントを見ることができます。
+  1. entity mapping 
+     
+     テキスト中のエンティティをKG内の対応するエンティティへ結びつけるコンポーネントです。
+  
+  2. coreference resolution
+     
+     エンティティの照応解析を行うコンポーネントです。
+
+  3. triple extraction
+
+     open information extraction の技術を使って自然言語のテキストから triple を生成するためのコンポーネントです。
+
+  4. triple integration
+     
+     entity mapping, coreference resolution, triple extraction から得られた結果を統合して triple を生成するコンポーネントです。
+
+  5. predicate mapping
+     
+     テキスト中の predicate と他の KG に定義してある predicate とのマッピングを行います。
+     
+    
+  実際にデータフローを眺めていると以下のようになります。
+   
+  #+caption: Fig. 2 論文より引用
+  [[../img/t2kg_example_flow.png]]
+
+   以降でそれぞれのコンポーネントついて触れていきましょう。
+** Entity Mapping
+   Entity Mapping ではテキスト中に表れた entity に対して、 KG内にその entity を指す 既存の URI(uniform resource identifier) があればそれを割り当て、そうでなければそれを URI として出力します。例えば "United States" という entities がテキストから得られたとき、 "dbpedia:United_States" が KG 内にあれはそれは "United States" へ割り当てられます。逆に  "Barron Trump" を得たときに KG内に該当 entity がなければ  "ex:Barron Tramp" を URI として採用し割当を行います。
+   
+** Coreference Resolution
+   Coreference Resolution はエンティティの照応解析を行うためのコンポーネントです。一般的にテキストには指示語や略語、別の言葉による同一エンティティの表現が多く含まれるので、このコンポーネントは非常に重要な役割を担っています。
+   
+   このコンポーネントを使うと、エンティティとその様々な別表現をグループ化することができます。これによって同一エンティティに対して行われたことをまとめ上げることができます。
+   
+   #+begin_src dot :file ../img/coreference_resolution.png
+   digraph G {
+   label = "text: \"Barak Obama was born in Hawaii. It located in United States.\""
+   graph [
+   rankdir = TB,
+   ];
+   
+   b1 [label = "Barak Obama"];
+   b2 [label = "Barak Obama"];
+   u1 [label = "United_States"];
+   u2 [label = "United_States"];
+
+   subgraph cluster1 {
+   label = "coreference resolutioned"
+   b1 -> "Hawaii, it" [label="born_in"];
+   "Hawaii, it"-> u1 [label="located_in"];
+   };
+   subgraph cluster2 {
+   label = "not coreference resolutioned"
+   b2 -> "Hawaii" [label="born_in"];
+   "it"-> u2 [label="located_in"];
+   }
+   }
+   #+end_src
+
+   #+RESULTS:
+   [[file:../img/coreference_resolution.png]]
+   
+** Triple Extraction
+   自然言語理論では、任意の文は一連の関係とそれに関する引数を考えることで意味を理解することができると主張されています。本コンポーネントでは最終的には、predicate (述語、関係を表す) と subject (主語、引数を表す) 、object (目的語、引数を表す) のリストである <subject, predicate, object> である triple をテキストから抽出します。
+   
+   本コンポーネントでは open information extraction を用いて triple 抽出を行いました。open information extraction ではテキストをテンプレートを用いて triple に変換します。例えば "<Barack Obama, born in, Honolulu Hawaii>" は  "<subject, predicate, object>" にそれぞれ対応しています。
+** Triple Integration
+   triple integration では triple を entitiy mapping コンポーネント と coreference resolution コンポーネント、triple extraction コンポーネントを用いて作成します。
+
+   勿論 triple extraction でも triple は出力されますが、 entitiy mapping や coreference resolution ができていないのでこれをそのまま KG へ入れてしまうと、性能を低下させてしまう要因になってしまいます。
+
+   Triple Integration では次のプロセスが行われます。
+   
+   1. 同一のエンティティを coreference resolution の結果からグループ化します。
+   2. そのグループから代表となるエンティティを投票アルゴリズム（voting algorithm、おそらく多数決）を用いて選出します。
+
+     これは同一グループ内のエンティティには指示後によるものだけではなく、別の表現で表されている語があると考えているために設定しています。
+   3. triple 内のすべてのエンティティは、それぞれの代表のエンティティで書き換えられます。
+   4. predicate については新しい URI を割り当てます。
+   5. 次に triple の object がエンティティ出なかった場合、それを triple としてではなくリテラルとして残しておきます。
+      
+      上記のプロセスの後、残った triple が元のテキストから抽出された triple となります。
+** Predicate Mapping
+*** Triple Enrichment
+*** Rule-Based Candiate Generation
+*** Similarity-Based Candidate Generation
+*** Candidate Selection
+* 実験
+* 結論
