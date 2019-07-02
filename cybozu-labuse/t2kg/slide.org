@@ -44,7 +44,7 @@
 
   [[https://aaai.org/ocs/index.php/WS/AAAIW17/paper/view/15129][T2KG]] は 国立情報学研究所から出て 2017年の3月に AAAI に採択された論文で、jstage では [[https://www.jstage.jst.go.jp/article/transinf/E101.D/1/E101.D_2017SWP0006/_pdf/-char/ja][An Automatic Knowledge Graph Creation Framework from Natural Language Text]] という名前で論文がまとめられています。(2019年7月1日時点で、なぜか AAAI のDBサーバが落ちているっぽいので紹介しました。内容はほとんど変わらないのでどちらを見ても大丈夫です。)
   
-  T2KG の凄いところは、 *自然言語のテキスト* から *Knowledge Graph* を作るところまでの手法を示しているという点です。この手の界隈で有名な DeepDive では、自然言語にとどまらず論文のテーブルや画像なども情報源として Knowledge base の構築をするまでを示していましたが、（読むとわかりますが）かなり長く、こちらは *自然言語のテキスト* をデータ源としているところが特徴です。また、DeepDiveに比べて小規模にまとまったプロジェクトになっています。あとは、DeepDiveに比べて  *人員リソース* が少ないです。
+  T2KG の特徴は、 *自然言語のテキスト* から *Knowledge Graph* を作るところまでの手法を示しているという点です。この手の界隈で有名な DeepDive では、自然言語にとどまらず論文のテーブルや画像なども情報源として Knowledge base の構築をするまでを示していましたが、こちらは *自然言語のテキスト* のみをデータ源としています。また DeepDiveに比べて小規模にまとまったプロジェクトになっています。あとは、DeepDiveに比べて  *人員リソース* が少ないです。
   
   ここで以下に論文中の導入を簡単に示します。
 
@@ -63,10 +63,9 @@
   
   類似度ベースのアプローチでは、 triple 要素間の類似度を計算するための新たなベクトルベースの類似度メトリックを提案します。
   
-  性能評価はKG 作成タスクの T2KG フレームワークの各段階にについてそれぞれ行いました。さらに knowledge population task において T2KG の実証的な研究を行いました。knowledge population task と knowledge creation task との違いは、knowledge population taskでは与えられた KG に triple を取り込むというタスクになっているのに対して、 KG creation task では KG の構築を考慮する、という点です。
+  KG creation task の性能評価としては T2KG フレームワークの各段階にについてそれぞれ行いました。更に knowledge population task については T2KG の実証的な研究を行いました。KG creation task とknowledge population task との違いは、KG creation task では KG の構築を考慮するのに対して、 knowledge population taskでは与えられた KG に triple を取り込むというタスクになっている、という点です。
   #+END_QUOTE
   
-
 * T2KG のアーキテクチャ  
   もう少し何ができるかをわかりやすくするために、ここで簡単に T2KG のアーキテクチャをさらっと眺めて見ましょう。
  
