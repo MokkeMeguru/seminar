@@ -1,0 +1,44 @@
+#+TITLE: 因子グラフって何？~因子グラフ&Gibbs Sampling編~
+#+AUTHOR: MokkeMeguru
+# This is a Bibtex reference
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:t arch:headline ^:nil
+#+OPTIONS: author:t broken-links:nil c:nil creator:nil
+#+OPTIONS: d:(not "LOGBOOK") date:nil e:nil email:nil f:t inline:t num:t
+#+OPTIONS: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+OPTIONS: timestamp:nil title:t toc:nil todo:t |:t
+#+LANGUAGE: ja
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 26.2 (Org mode 9.2.3)
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [a4paper, dvipdfmx, 10pt]
+#+LATEX_HEADER: \usepackage{amsmath, amssymb, bm}
+#+LATEX_HEADER: \usepackage{graphics}
+#+LATEX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \usepackage{times}
+#+LATEX_HEADER: \usepackage{longtable}
+#+LATEX_HEADER: \usepackage{minted}
+#+LATEX_HEADER: \usepackage{fancyvrb}
+#+LATEX_HEADER: \usepackage{indentfirst}
+#+LATEX_HEADER: \usepackage{pxjahyper}
+# #+LATEX_HEADER: \hypersetup{colorlinks=false, pdfborder={0 0 0}}
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage[top=20truemm, bottom=25truemm, left=25truemm, right=25truemm]{geometry}
+#+LATEX_HEADER: \usepackage{ascmac}
+#+LATEX_HEADER: \usepackage{algorithm}
+#+LATEX_HEADER: \usepackage{algorithmic}
+# #+LATEX_HEADER: \addbibresource{/home/meguru/Github/private-Journal/research-plan/reference.bib}
+#+DESCRIPTION:
+#+KEYWORDS:
+#+STARTUP: indent overview inlineimages
+* 導入
+#+BEGIN_QUOTE
+Gibbs Samplingがちらっと見えたけど実はまだまだ先は長かった
+#+END_QUOTE
+
+こちら、無向グラフがなんとなくわかってきたところで、ようやく本題のGibbs Samplingが見えそうになったところで、因子グラフについて勉強しなければならなくなったのでもう一息、という感じの深夜1時半です。
+* 因子グラフ(factor graph)
+  因子グラフは無向グラフモデルの別の描き方です。以下の3つの図を見てください。
+  [[../img/factor_diagrams.png]]
+  
+  
