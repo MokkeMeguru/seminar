@@ -1,0 +1,173 @@
+#+TITLE: テキストから Knowledge Graph を構築フレームワーク、T2KGを読む
+#+AUTHOR: MokkeMeguru
+# This is a Bibtex reference
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:t arch:headline ^:nil
+#+OPTIONS: author:t broken-links:nil c:nil creator:nil
+#+OPTIONS: d:(not "LOGBOOK") date:nil e:nil email:nil f:t inline:t num:t
+#+OPTIONS: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+OPTIONS: timestamp:nil title:t toc:nil todo:t |:t
+#+LANGUAGE: ja
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 26.2 (Org mode 9.2.3)
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [a4paper, dvipdfmx, 10pt]
+#+LATEX_HEADER: \usepackage{amsmath, amssymb, bm}
+#+LATEX_HEADER: \usepackage{graphics}
+#+LATEX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \usepackage{times}
+#+LATEX_HEADER: \usepackage{longtable}
+#+LATEX_HEADER: \usepackage{minted}
+#+LATEX_HEADER: \usepackage{fancyvrb}
+#+LATEX_HEADER: \usepackage{indentfirst}
+#+LATEX_HEADER: \usepackage{pxjahyper}
+# #+LATEX_HEADER: \hypersetup{colorlinks=false, pdfborder={0 0 0}}
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+# #+LATEX_HEADER: \usepackage[backend=biber, bibencoding=utf8]{biblatex}
+#+LATEX_HEADER: \usepackage[top=20truemm, bottom=25truemm, left=25truemm, right=25truemm]{geometry}
+#+LATEX_HEADER: \usepackage{ascmac}
+#+LATEX_HEADER: \usepackage{algorithm}
+#+LATEX_HEADER: \usepackage{algorithmic}
+# #+LATEX_HEADER: \addbibresource{/home/meguru/Github/private-Journal/research-plan/reference.bib}
+#+DESCRIPTION:
+#+KEYWORDS:
+#+STARTUP: indent overview inlineimages
+* 導入
+  #+BEGIN_QUOTE
+  まずは [[https://sites.google.com/view/t2kg-demo/home][こいつ]] を見てくれ、こいつをどう思う？
+  #+END_QUOTE
+  
+  #+caption: [[https://sites.google.com/view/t2kg-demo/home][デモサイトより引用]]
+  [[../img/t2kg_demo.png]]
+
+  このシンプルなかっこいいサイトは自然言語のテキストから Knowledge Graph を構築するためのフレームワーク、T2KGのデモページです。
+
+  [[https://aaai.org/ocs/index.php/WS/AAAIW17/paper/view/15129][T2KG]] は 国立情報学研究所から出て 2017年の3月に AAAI に採択された論文で、jstage では [[https://www.jstage.jst.go.jp/article/transinf/E101.D/1/E101.D_2017SWP0006/_pdf/-char/ja][An Automatic Knowledge Graph Creation Framework from Natural Language Text]] という名前で論文がまとめられています。(2019年7月1日時点で、なぜか AAAI のDBサーバが落ちているっぽいので紹介しました。内容はほとんど変わらないのでどちらを見ても大丈夫です。)
+  
+  T2KG の特徴は、 *自然言語のテキスト* から *Knowledge Graph* を作るところまでの手法を示しているという点です。この手の界隈で有名な DeepDive では、自然言語にとどまらず論文のテーブルや画像なども情報源として Knowledge base の構築をするまでを示していましたが、こちらは *自然言語のテキスト* のみをデータ源としています。また DeepDiveに比べて小規模にまとまったプロジェクトになっています。あとは、DeepDiveに比べて  *人員リソース* が少ないです。
+  
+  ここで以下に論文中の導入を簡単に示します。
+
+  #+BEGIN_QUOTE
+  Knowledge Graph(以降KGと省略) は、ノードはエンティティを、エッジはエンティティ同士の関係を示すグラフの形式に知識を落とし込む手法です。一般に知られた Knowledge Graph の例としては DBpedia や、Freebase、そしてYAGO を挙げることができます。
+  
+  これらのKGは質問応答や知識の一覧、知識の視覚化にとって重要な役割を果たしています。新たな知識は定期的に増えていきますが、しかし一般にそれらの形式は自然言語のテキストであり、これは直ちにKGへ持ち込むことができません。更に都合が悪いことに、その自然言語のテキストの増加は、年々加速傾向にあります。
+
+  最近の多くのアプローチでは、自然言語のテキストを triple と呼ばれる (subject(主題), predicate(述語), object(目的)) の形にして知識とする手法を取っています。しかしこれらのアプローチはテキストから triple を抽出するタスクで十分な性能を満たしているとは言い難く、特に KG 内の対応する要素と triple の要素をマッピングする機能（特に predicate のマッピング）がうまくできていません。
+  
+  triple の要素と KG内の要素とのマッピングはKGにとって非常に重要な課題で、なぜならそれはデータの異質（heterogeneity ）を減らすことができ、KG内の探索を用意にすることもできるからです。(KGを本棚にでも例えれば、本の区分が細かく散らばってしまう様を想像するとわかりやすいと思います) 
+
+  多くの研究で上述の問題の解決が図られていましたが、それらのほとんどは subject と object に関するものばかりで、predicate についてはあまり議論されていませんでした。しかしながら Entity extraction: From unstructured text to DBpedia RDF triples という論文では自然言語のテキストから抽出された triple の predicate を KG 内の同一の predicate に写像するための手法を紹介しました。この手法は単純なルールベースのアプローチを含んでいましたが、適用するテキストの範囲がまばらにになっていたおかげで、ルールの生成は効率的に処理することができていました。
+
+  本論文では、自然言語のテキストからKGを自動的に生成するフレームワーク、T2KGを提案します。T2KGでは triple 内の要素と KG 内の既存の対応する要素をマッピングするために ルールベースのアプローチと類似度ベースのアプローチの2つを組み合わせた手法を提案しています。
+  
+  類似度ベースのアプローチでは、 triple 要素間の類似度を計算するための新たなベクトルベースの類似度メトリックを提案します。
+  
+  KG creation task の性能評価としては T2KG フレームワークの各段階にについてそれぞれ行いました。更に knowledge population task については T2KG の実証的な研究を行いました。KG creation task とknowledge population task との違いは、KG creation task では KG の構築を考慮するのに対して、 knowledge population taskでは与えられた KG に triple を取り込むというタスクになっている、という点です。
+  #+END_QUOTE
+  
+* T2KG のアーキテクチャ 
+  もう少し何ができるかをわかりやすくするために、ここで簡単に T2KG のアーキテクチャをさらっと眺めて見ましょう。
+ 
+  #+caption: Fig. 1 論文より引用
+  [[../img/t2kg_architecture.png]]
+
+  この図では4つのデータソースと、1つのアウトプットが存在していることがわかります。
+
+  まず Natural Language Text はそのまま自然言語のテキストを示しており、分析対象のテキストということになります。
+
+  左上の Knowledge Base とはもっぱら DBPedia を指しており、これはテキストに表れる単語を URI (Uniform Resource Identifier) へマッピングする役割を担っています。例えば、"まどマギ"という単語は URI "魔法少女まどか☆マギカ" に結びつける必要があって、そうでないと "まどマギ" と "まどかマギカ" が別物として処理されてしまいます。この手の処理は "共参照(coreference)" という "照応解析(reference resolution)" の分野の一種として捉えれることができます。(~キラキラハイパーディープラーニングエンジニア辺りから嫌われている~ 自然言語処理100本ノック56 がちょうどこの例題なので、やってみたら需要がわかるかもしれません）
+
+  右上の Text（Natural Language Text）と Knowledge Graph は、中央の Text Triples をより高品質なものにするために用いられるデータです。どちらも先述のそれらと同一のものと捉えても問題ないようです。
+
+  次に上の図から、次の 5つのコンポーネントを見ることができます。
+  1. entity mapping 
+     
+     テキスト中のエンティティをKG内の対応するエンティティへ結びつけるコンポーネントです。
+  
+  2. coreference resolution
+     
+     エンティティの照応解析を行うコンポーネントです。
+
+  3. triple extraction
+
+     open information extraction の技術を使って自然言語のテキストから triple を生成するためのコンポーネントです。
+
+  4. triple integration
+     
+     entity mapping, coreference resolution, triple extraction から得られた結果を統合して triple を生成するコンポーネントです。
+
+  5. predicate mapping
+     
+     テキスト中の predicate と他の KG に定義してある predicate とのマッピングを行います。
+     
+    
+  実際にデータフローを眺めていると以下のようになります。
+   
+  #+caption: Fig. 2 論文より引用
+  [[../img/t2kg_example_flow.png]]
+
+   以降でそれぞれのコンポーネントついて触れていきましょう。
+** Entity Mapping
+   Entity Mapping ではテキスト中に表れた entity に対して、 KG内にその entity を指す 既存の URI(uniform resource identifier) があればそれを割り当て、そうでなければそれを URI として出力します。例えば "United States" という entities がテキストから得られたとき、 "dbpedia:United_States" が KG 内にあれはそれは "United States" へ割り当てられます。逆に  "Barron Trump" を得たときに KG内に該当 entity がなければ  "ex:Barron Tramp" を URI として採用し割当を行います。
+   
+** Coreference Resolution
+   Coreference Resolution はエンティティの照応解析を行うためのコンポーネントです。一般的にテキストには指示語や略語、別の言葉による同一エンティティの表現が多く含まれるので、このコンポーネントは非常に重要な役割を担っています。
+   
+   このコンポーネントを使うと、エンティティとその様々な別表現をグループ化することができます。これによって同一エンティティに対して行われたことをまとめ上げることができます。
+   
+   #+begin_src dot :file ../img/coreference_resolution.png
+   digraph G {
+   label = "text: \"Barak Obama was born in Hawaii. It located in United States.\""
+   graph [
+   rankdir = TB,
+   ];
+   
+   b1 [label = "Barak Obama"];
+   b2 [label = "Barak Obama"];
+   u1 [label = "United_States"];
+   u2 [label = "United_States"];
+
+   subgraph cluster1 {
+   label = "coreference resolutioned"
+   b1 -> "Hawaii, it" [label="born_in"];
+   "Hawaii, it"-> u1 [label="located_in"];
+   };
+   subgraph cluster2 {
+   label = "not coreference resolutioned"
+   b2 -> "Hawaii" [label="born_in"];
+   "it"-> u2 [label="located_in"];
+   }
+   }
+   #+end_src
+
+   #+RESULTS:
+   [[file:../img/coreference_resolution.png]]
+   
+** Triple Extraction
+   自然言語理論では、任意の文は一連の関係とそれに関する引数を考えることで意味を理解することができると主張されています。本コンポーネントでは最終的には、predicate (述語、関係を表す) と subject (主語、引数を表す) 、object (目的語、引数を表す) のリストである <subject, predicate, object> である triple をテキストから抽出します。
+   
+   本コンポーネントでは open information extraction を用いて triple 抽出を行いました。open information extraction ではテキストをテンプレートを用いて triple に変換します。例えば "<Barack Obama, born in, Honolulu Hawaii>" は  "<subject, predicate, object>" にそれぞれ対応しています。
+** Triple Integration
+   triple integration では triple を entitiy mapping コンポーネント と coreference resolution コンポーネント、triple extraction コンポーネントを用いて作成します。
+
+   勿論 triple extraction でも triple は出力されますが、 entitiy mapping や coreference resolution ができていないのでこれをそのまま KG へ入れてしまうと、性能を低下させてしまう要因になってしまいます。
+
+   Triple Integration では次のプロセスが行われます。
+   
+   1. 同一のエンティティを coreference resolution の結果からグループ化します。
+   2. そのグループから代表となるエンティティを投票アルゴリズム（voting algorithm、おそらく多数決）を用いて選出します。
+
+     これは同一グループ内のエンティティには指示後によるものだけではなく、別の表現で表されている語があると考えているために設定しています。
+   3. triple 内のすべてのエンティティは、それぞれの代表のエンティティで書き換えられます。
+   4. predicate については新しい URI を割り当てます。
+   5. 次に triple の object がエンティティ出なかった場合、それを triple としてではなくリテラルとして残しておきます。
+      
+      上記のプロセスの後、残った triple が元のテキストから抽出された triple となります。
+** Predicate Mapping
+*** Triple Enrichment
+*** Rule-Based Candiate Generation
+*** Similarity-Based Candidate Generation
+*** Candidate Selection
+* 実験
+* 結論

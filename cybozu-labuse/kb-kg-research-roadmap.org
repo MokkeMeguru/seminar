@@ -1,0 +1,116 @@
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
+#+OPTIONS: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+OPTIONS: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+OPTIONS: tasks:t tex:t timestamp:t title:t toc:t todo:t |:t
+#+TITLE: KB-KG-research-roadmap
+#+DATE: <2019-06-18 火>
+#+AUTHOR: meguru
+#+EMAIL: meguru@meguru-Latitude-7390
+#+LANGUAGE: en
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 26.1 (Org mode 9.1.9)
+
+* what is this?
+  knowledge base と knowledge graph に関する論文調査のロードマップ。これに従って要約記事を作成していく。
+  
+* roadmap 
+** WTF is a knowledge graph ? 
+   knowledge graph と knowledge base の違いについて触れている(タイトルのWTFはどう考えても what the f**k だと思われるのだが、果たして)。サブタイトルは ~Unpicking a tangle of terminology to conclude it’s semantic, smart and alive.~ となっており、直訳すると ~それは意味論的で、賢くそして生き生きとしたものである専門用語のもつれを解きほぐします~  のような雰囲気になると思われる。つまりわけのわからない、意味が時とともに変わってしまう専門用語である knowledge graph について解説する、という風に捉えられる。
+
+   特にこの記事で引用されている論文は、Towards a Definition of Knowledeg Graph というもので、ここが記事が書かれた現在(2018年)のKnowledge Graph の定義であるとしている。
+   
+   #+begin_quote
+   A knowledge graph acquires and integrates information into a ontology and applies a reasoner to derive new knowledge.
+   #+end_quote
+
+   #+begin_quote
+   Knowledge Graph は情報を所得しontology に統合し、推論を用いて新しい知識を導き出すものを指します。
+   #+end_quote
+
+   これが記事で最も重要視している Knowledge Graph の定義で、この記事の残りの部分はこの文言に登場する用語の解説に割かれている。
+   
+   [[https://hackernoon.com/wtf-is-a-knowledge-graph-a16603a1a25f][url]]
+
+** Towards a Definition of Knowledge Graphs 
+   knowledge graph の定義についての論文。knowledge graph が研究やビジネスの場に上がってきているものの、それはknowledge graph の一部のみを指すことが多いため、この用語の定義をしなければならないとしている。以下 abstract の意訳。
+
+#+begin_quote   
+   一般に彼らが、knowledge graph としてみなしているものは、 semantic web technologies (意味論的Web 技術…？)、linked data (おそらくSEOや推薦アルゴリズムなどを指している)、large-scale data analytics (大規模データ解析)、 cloud computing である。彼らが knowledge graph の例として取り上げている人気の、そして影響力のあるものは Google Knowledge Graph(2012) であり、これを受けて彼らは特に定義することなくKnowledge Graphというものを研究してきた。
+   
+   しかし Knowledge Graph に多義的な解釈が存在しているせいで、これの発展は阻害され続けてきている。多くの研究論文は、Google Knowledge Graph を参考にしていますが、Google Knowledge Graph自身で使われている技術に関して公式な文書は存在しない。
+   
+   我々はコンセプトや技術を学術及び商業の舞台で広めていくための理想的な前提条件として、曖昧さのないある特定の定義が必要であると考えている。よって本論文では、この曖昧さを残してきた歴史とその多義性を考慮しつつ、Knowledge Graph とはなにかを定義するために議論する。
+   
+   本論文の目標は、この話題についての議論の基礎として機能すること、彼らのKnowledge Graph に関するビジョンの共通項を見出し彼らに貢献できる Knowledge Graph の定義を提案することだ。
+#+end_quote
+
+  [[http://ceur-ws.org/Vol-1695/paper4.pdf][url]]
+** DeepDive
+   半手動 knowledge base 構築システムについての論文。読むのは全体の論文ではなく(205ページあるので時間が足りない)、その要約の論文。
+
+
+   DeepDive は専門家 (domain expert) からのルールや修正を反映して自動的に entity 間の relation を取り出し、それを knowledge base の形に落とし込む (Gibbs sampling などを使って relation を周辺化するようだ)。既存研究と比較したいところは、これは自動的に knowledge base を作りたいわけではなく、例えばIBM Watson のような人力の作業を含む knowledge base 作成のコンテクストで、どれだけ人力を必要な部分ににのみ割り当てることができるか、という問題を最適化するための枠組みであるという点だろう。
+
+   [[https://cs.stanford.edu/people/chrismre/papers/deepdive_highlight.pdf][url]]
+   [[http://www.vldb.org/pvldb/vol8/p1310-shin.pdf][参考文献(逐次更新に関するアルゴリズム)]]
+   [[http://deepdive.stanford.edu/distant_supervision][distant supervision]]]
+   [[https://ipsj.ixsq.nii.ac.jp/ej/index.php?active_action=repository_view_main_item_detail&page_id=13&block_id=8&item_id=190358&item_no=1][読みたい論文(有料)]]
+   [[https://www.fujixerox.co.jp/company/technical/tr/2014/pdf/s_08.pdf][tea break]]
+** 深層学習
+   DeepDiveで登場したGibbs Sampling がなぜ knowledge graph の構築に役立つのか、という疑問を解消するために、手元にある書籍を参照したところ、Gibbs Sampling に関する内容があったため、読む。
+   
+   DeepDive 次第ではあるが、もしここまで読んでも Gibbs Sampling と Knowledge base の関係がわからなければ加えて文献を追加する。
+
+** snorkel 
+   DeepDive projectは 2017 年に打ち切られている。snorkel はこの後続となるプロジェクトであり、何らかの参考になるのではないかと考えている。しかし、これについては内容がかなり散らばっているため、これがなんのためのプロジェクトであるのかについて調査する必要がある。(簡単に調査して、不要そうであれば削除する)
+   
+   
+   [[https://hazyresearch.github.io/snorkel/][url]]
+   
+   
+*** 追記
+    どうやら snorkel はDeepDive の（特に自然言語の）データの自動ラベリングという点を重点的に引き継いでいるようだ。しかしこれが 知識獲得のためのラベル付データ獲得という方向から有用であるらしいという記述があったため、このプロジェクトについては該当部についての調査のみを行いたい。
+** T2KG: An End-to-End System for Creating Knowledge Graph from Unstructured Text
+   国立情報学研究所の出した論文。AAAIに通っている。
+
+   最もやりたいことに近い内容であると考えている。以下Abstruct の意訳。
+
+   
+   #+begin_quote
+   Knowledge Graph は現代のアプリケーションにおいて重要な役割を果たしている。しかし構造化されていないテキストデータからKGを構築することは、この構造化されていないテキストデータの性質上、非常に難しい問題として捉えられている。
+   
+   結果として多くのKGを構築するためのアプローチでは、それを構築するために、構造化されていないテキストデータから構造化されたテキストデータへ変換する手法を用いている。このようなアプローチでは、抽出された述語(predicate) を別のKGの同一の述語(predicate)に合理的マッピングすることができない。述語マッピング(predicate mapping) は重要な手続きだ。なぜならそれは異質性(heterogeneity)の問題を軽減できる点や、KG上の検索可能性を向上させることにつながる可能性がある点で優れているからだ。
+
+   本論文では先述した問題を考慮した End-to-End なシステムである、 T2KG というシステムを提案する。このシステムでは、述語をKG内の同一の述語とマッピングするために、ルールベースのアプローチと、類似性ベースのアプローチを合成して用いている。
+   
+   予備実験結果に基づくと、このハイブリッドアプローチでは、述語マッピングのタスクの制度を低下させることはなく、recall を 10.02%、F-値を 6.56 % 向上させる。またKG作成にオープンドメインで取り組みましたが、システムはこのタスクでTripleを生成した際の F-値で 50% の精度を達成した。
+   #+end_quote
+   
+   [[https://www.aaai.org/ocs/index.php/WS/AAAIW17/paper/download/15129/14743][url]]
+** An Automatic Knowledge Graph Creation Framework from Natural Language Text 
+   T2KGの別論文。おそらく国内用の要約論文。目を通して目ぼしいものがなければ省略予定。
+
+   [[https://www.jstage.jst.go.jp/article/transinf/E101.D/1/E101.D_2017SWP0006/_pdf/-char/ja][url]]
+** Grakn AI
+   Knowledge Graph の作成に関する支援ツール。テキストからKGまで作る支援機構が備わっているようなので、ドキュメントを読んでまず英語、次に日本語でこれが実行できるか実験を行いたい。(ref. kb-kg-experiment-roadmap.org)
+   
+   [[https://blog.grakn.ai/text-mined-knowledge-graphs-beyond-text-mining-1ff207a7d850][url]]
+** Scalable Knowledge Graph Construction from Twitter
+   Twitter データを用いた knowledge base の作成に関する論文。Twitterデータに内在するノイズ除去についても述べられている。
+   [[https://arxiv.org/abs/1906.05986][url]]
+
+* roadmap (optional)
+  学術研究(ないし趣味)としての roadmap 
+
+** COMET: Commonsense Transformers for Automatic Knowledge Graph Construction
+   Concept Net を深層学習を用いて解こうとした論文。ConceptNetとATOMICを比較に用いている。
+   
+   [[https://arxiv.org/abs/1906.05317][url]]
+
+** Others
+   https://www.one-tab.com/page/cMSHakDYSHaT1z6FotoPcA
+
+** tea break
+   https://www.one-tab.com/page/8B0Go2KORbKnUBiF5FNBpg
+

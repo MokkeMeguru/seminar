@@ -1,0 +1,119 @@
+#+TITLE: Knowledge base 構築プロジェクト DeepDive をさらっと眺めてみる
+#+AUTHOR: MokkeMeguru
+# This is a Bibtex reference
+#+OPTIONS: ':nil *:t -:t ::t <:t H:3 \n:t arch:headline ^:nil
+#+OPTIONS: author:t broken-links:nil c:nil creator:nil
+#+OPTIONS: d:(not "LOGBOOK") date:nil e:nil email:nil f:t inline:t num:t
+#+OPTIONS: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+OPTIONS: timestamp:nil title:t toc:nil todo:t |:t
+#+LANGUAGE: ja
+#+SELECT_TAGS: export
+#+EXCLUDE_TAGS: noexport
+#+CREATOR: Emacs 26.2 (Org mode 9.2.3)
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [a4paper, dvipdfmx, 10pt]
+#+LATEX_HEADER: \usepackage{amsmath, amssymb, bm}
+#+LATEX_HEADER: \usepackage{graphics}
+#+LATEX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \usepackage{times}
+#+LATEX_HEADER: \usepackage{longtable}
+#+LATEX_HEADER: \usepackage{minted}
+#+LATEX_HEADER: \usepackage{fancyvrb}
+#+LATEX_HEADER: \usepackage{indentfirst}
+#+LATEX_HEADER: \usepackage{pxjahyper}
+# #+LATEX_HEADER: \hypersetup{colorlinks=false, pdfborder={0 0 0}}
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+# #+LATEX_HEADER: \usepackage[backend=biber, bibencoding=utf8]{biblatex}
+#+LATEX_HEADER: \usepackage[top=20truemm, bottom=25truemm, left=25truemm, right=25truemm]{geometry}
+#+LATEX_HEADER: \usepackage{ascmac}
+#+LATEX_HEADER: \usepackage{algorithm}
+#+LATEX_HEADER: \usepackage{algorithmic}
+# #+LATEX_HEADER: \addbibresource{/home/meguru/Github/private-Journal/research-plan/reference.bib}
+#+DESCRIPTION:
+#+KEYWORDS:
+#+STARTUP: indent overview inlineimages
+* 導入
+  #+BEGIN_QUOTE
+  Knowledge Base なんもわからん
+  #+END_QUOTE
+  
+  前回の Knowledge Graph とはなんぞや、という記事から、次に目をつけたのが、Knowledge Base 構築プロジェクトとして界隈では名高い DeepDive というプロジェクトです。
+  
+  DeepDive は 2017 年まで 稼働していた、現在は snokel というプロジェクトを後継としているKnowledge Base (以降KBと略す)を構築するためのプロジェクトです。
+  
+  こいつは例えば 違法人身売買の取引検出のための KB や、遺伝子異常と病気の関連をまとめた KB 、製薬関係の KB 、そして一般知識のための KB に用いられている KB 構築のための効率的なツール・手法を提供しました。
+  
+  DeepDive の特徴を一つ挙げるとすれば、 *人間とシステムを効率的に組み合わせて* KB構築を目指すという方針があります。
+  
+  DeepDive が始動した当時は、KB は数百人単位の専門家を集めて20年以上かけてようやく作り上げられるものとみなされていましたが、 *それを超える速度* で *同等かそれ以上の精度の* KB 構築を行うことができました。
+ 
+  とはいえこれには裏話があります。端的に言うと、先述のように DeepDive はデータ構築に人手が必要になっているのですが、PaleoDB というKB構築プロジェクトでそれをボランティアで募集したところ、あんまりにも人が集まらず、当初ほとんどデータが集まリませんでした。実際に図を見るとわかりますが1994年から2015年のうちの後半にデータが急増していることがわかります。
+  
+  #+caption: Figure 4.12 DeepDive より引用
+  [[../img/deepdive_time.png]]
+ 
+どこかの日本語 ConceptNet と同様にボランティアで上手いこと人を集めるのは大変なんだなぁと思いますね。
+* DeepDive が達成したこと
+  DeepDiveというプロジェクトが技術的に達成したことは(達成したと主張していること)は3つあります。
+
+*** 一般的なKB構築システムのワークフローの設計
+    KB構築ツールってどう作ればいいのか、という大まかな指針を見せたということです。つまり今後KB構築ツールを作るときには是非参考にしてねってことです。コンピュータに強くない専門家でもKB構築ができるような手法でツールを組んでおり、様々なドメインに関するKBでも対応できるような柔軟な機構を持っているので、確かにこの点では有利であると言えます。
+    
+*** 効果的でスケーラブルな統計的推論・学習機構
+    DeepDive は3段階フレームワークの機構を持っています。リレーショナルデータベースの拡張性を信じて特徴抽出、確率的エンジニアリング(例えば途中で出てくるGibbsSamplingなど)でのスピードの向上や、スケーラビリティの確保を可能にしています。これによって中身のパフォーマンスを気にすることなくKB構築に専門家を従事させることができるというものです。
+
+*** 効果的なインタラクティブデバッグ・開発環境の提供
+    KBは一回データセットに通して終わりというわけではなく、そこから追加されていく知識にどう対応していくかが問題となります。DeepDive ではそれを解決するために反復開発パターンを作成し、この高速化を図りました。
+* DeepDive が作りたい Knowledge Base ってどういうもの？
+  
+  DeepDive が作りたいKBとは一体どういうものなのか、それは以下の図が端的に示しています。
+
+  #+caption: Figure 2.1 DeepDive より引用
+  [[../img/deepdive_kb.png]]
+
+  DeepDive は Entity (人名など) を何らかのデータソース(テキストやテーブル)から抽出し、それらが含まれている文から Entity 同士の関係性を解析し、KBへ統合していきます。特にDeepDiveが解析したい内容は4種類になります。
+  1. Entity
+     人名や地名など
+
+  2. Relation
+     ２，ないしそれ以上のエンティティのを関連付け、それらの間に関連があることを示す。
+
+  3. Mention
+     entity linking などを行う。
+
+  4. Relation Mention
+     2、ないしそれ以上のエンティティの間をつなぐフレーズを指します。
+
+DeepDiveではこれらの方のオブジェクトをデータベースの relation や確率変数として表現するための抽象化を行い、オブジェクト間の関係を記述するための言語を提供します。
+
+尚 DeepDive では *情報源に基づいた正しい情報のKB* を目指しているので、推論して新たな知識を見出す、といったことはしていないようです。
+* 一般的なKB構築システムのワークフローの設計
+  DeepDive が提案する一般的なKB構築システムのワークフローは、  *Feature Extraction* *Domain Knowledge Integration* *Supervision* *Interative Refinement* になります。
+
+  #+caption: Figure 3.2 DeepDive より引用
+  [[../img/deepdive-framework.png]]
+
+  - Feature Extraction
+    
+    Stanforrd NLP や Optical Character Recognition(OCR) のためのツールを使って非構造データから情報を抽出する必要があります。更にこれらの情報を更に処理するためのユーザ定義関数(UDF user defined functions) を作成することも考えられます。
+
+  - Domain Knowledge Integration
+    
+    ドメインごとに知識を統合することでKnowledge Baseの性能を向上させることができます。例えば述語 "結婚関係にある" の知識抽出を助けるために知識として、"一夫一婦制"という知識を導入することができます。これによって、例えば "A さんと B さんは結婚している" と "B さんと C さんは結婚している" というどちらか一方が間違っているデータが入ってきたときに、KBに統合した知識によって、片方が間違っている可能性についてこのシステムは考えることができます。実際DeepDiveでは導入された知識に対してユーザからの手動、ないし自動的にその知識への信頼度を実数値で算出できるようになっています。
+    
+- Supervision
+  
+  Feature Extraction と Domain Knowledge Integration が終わったデータに対してどの程度その抽出された情報に重みをつけるかが Supervision でのタスクです。システム内の述語の数が増えていくについれて、それぞれの関数についての訓練データを与えることは非常にコストが高いということは明らかです。DeepDiveでは、勿論ユーザからの教師データを受け付けるような機構も持ち合わせていますが、それ以外に Distant Supervision という手法を用いる機構も持っています。[[http://deepdive.stanford.edu/distant_supervision][参考]]
+
+- Interative Refinement
+  
+  上記の3つのシステムを組み合わせても実際は直ちに高い性能を得られるわけではありません。それらを繰り返してノイズとなる誤りデータを修正できるように上記のシステムを改善し、再学習するための機構が必要になります。それがこの Interative Refinement という機構です。DeepDiveでは、このプロセスでユーザがより簡易に改善が行えるようなプロトコルを提供するとともに、KBCで発生した誤りの原因を診断するための機構も提供します。
+  
+* 因子グラフ
+  上記手順で集まったデータの解析（統計的推論・学習）のため、因子グラフを適用しました。
+  しかし因子グラフは、確率変数を相関構造から分離しなければならないという原則があります。この原則に従って、確率データベースを $\mathcal{D}=(\mathcal{R}, \mathcal{F})$ と定義します。ここで $\mathcal{R}$ とはユーザスキーマを示し、 $\mathcal{F}$ とは相関スキーマと命名しました。ユーザスキーマ同士の関係はユーザリレーション、同様に相関スキーマ同士の関係は相関リレーションと命名しました。ユーザ側はユーザスキーマのみを対話し、相関スキーマはユーザスキーマ間の相関を取得します。
+  #+caption: Figure 2.3 DeepDive より引用
+[[../img/deepdive_factor_graph.png]]
+
+  ユーザリレーションのそれぞれのタプル $R_i \in \mathcal{R}$ は $\mathbb{D}$ より一意にIDが割り振られており、Boolean を示す $\mathbb{V}$ から値を割り振られています。$\mathbb{V}$ はタプルの存在をモデリングするか、$R_i$ の特別な属性をモデリングするために付与されています。
+* TODO Distant Supervision
