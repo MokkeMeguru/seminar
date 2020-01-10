@@ -162,6 +162,7 @@ Without the multi-scale discriminators, we observe that many repeated patterns o
 
 --- quoted from Pix2PixHD page 4 second column
    #+end_quote
+   https://github.com/NVlabs/SPADE/issues/50#issuecomment-494217696
    #+ATTR_LATEX: :width 10cm
    [[./gaugan_disc.png]]
 * 訓練・推論手法
