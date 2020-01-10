@@ -101,7 +101,7 @@ their normalization layers tend to “wash away” information contained in the 
 ** SPADE の細かい話
   次に細かい話としてSPADE の入力と出力を示しましょう。前提として、SPADE は BatchNormalization に合わせて モデルの複数ヶ所に適用されるので、それぞれの SPADE を $i$ で区別します。
 
-  SPADEの入力はセグメンテーション画像で、セグメンテーションラベルは [[https://github.com/NVlabs/SPADE/issues/29][one-hot vector になっており]] 、 つまりこれがいわゆるセグメンテーション画像の $C$ になります。これが $H^{i} \times W^{i}$ 個あるので、結局 SPADE の入力は　$m\in (\mathbb{L}^{H^{i}\times W^{i}} = \mathbb{R}^{H^{i} \times W^{i} \times C^{i}})$ となります。 $\beta^{i}, \gamma^{i}$ をそれぞれ後述する式で求めます。
+  SPADEの入力はセグメンテーション画像で、セグメンテーションラベルは [[https://github.com/NVlabs/SPADE/issues/29][one-hot vector になっており]] 、 つまりこれがいわゆるセグメンテーション画像の $C$ になります。これが $H^{i} \times W^{i}$ 個あるので、結局 SPADE の入力は　$m\in (\mathbb{L}^{H^{i}\times W^{i}} = \mathbb{R}^{H^{i} \times W^{i} \times {C^{i}}'})$ となります。 $\beta^{i}, \gamma^{i}$ をそれぞれ後述する式で求めます。
   それはそれとして、BatchNormalization Layer から $\mu^{i}, \sigma^{i}$ をそれぞれ用意しておきます。
 
   BatchNormalization Layer に入ってくる Tensor $h^{i}$ と $\mu^{i}, \sigma^{i}, \beta^{i}, \gamma^{i}$ から $h^{i}$ -> [BN -> SPADE] -> ${h^i}'$ は 次の式で表すことが出来ます。
@@ -141,12 +141,29 @@ h^{i} &\in& \mathbb{R}^{N \times H^{i} \times W^{i} \times C^{i}}\\
    [[./SPADE_ResBlk.png]]
 
 *** SPADE
-    SPADE そのものについては、下に引用される図で説明します。
-
+    SPADE そのものについては、下に引用される図で説明します。ここで注意してほしいのは、SPADEそのものは **入力と出力で次元数が変わらない＝通常のNormalizationと同じ** という点です。すると問題になるのが、 **セグメンテーション画像をどう扱うか** です。
+    　セグメンテーション画像は一枚の $H'\times W' \times C' = 512 \times 512 \times C'$ で共通であり、これは SPADE に入ってくるデータの次元数 $H^{i} \times W^{i} \times C^{i}$ とは異なります。 $C$ については畳み込みレイヤーでどうとでもなるのですが (3x3-Conv-k で変えられる) $H, W$ についてはそうはいきません。なので SPADE では Resize を使って $H, W$ の変換を行います。 
     
+    #+ATTR_LATEX: :width 10cm
+    [[./spade.png]]
 
 ** Discriminator
+   Discriminator は Pix2PixHD と同等の機能を持っています。この Discriminator の図がわかりにくいので簡単に Pix2PixHD から引用を行いながら説明を行います(というか既存の解説記事はこのあたりの話雑すぎませんか？)。
    
+   #+begin_quote
+To address the issue, we propose using multi-scale discriminators. We use 3 discriminators that have an identical network structure but operate at different image scales.
+We will refer to the discriminators as D1, D2 and D3. Specifically, we downsample the real and synthesized highresolution images by a factor of 2 and 4 to create an image pyramid of 3 scales. The discriminators D1, D2 and D3 are
+then trained to differentiate real and synthesized images at the 3 different scales, respectively.
+Although the discriminators have an identical architecture, the one that operates at the coarsest scale has the largest receptive field.
+It has a more global view of the image and can guide the generator to generate globally consistent images. On the other hand, the discriminator at the finest scale encourages the
+generator to produce finer details. This also makes training the coarse-to-fine generator easier, since extending a lowresolution model to a higher resolution only requires adding
+a discriminator at the finest level, rather than retraining from scratch. 
+Without the multi-scale discriminators, we observe that many repeated patterns often appear in the generated images.
+
+--- quoted from Pix2PixHD page 4 second column
+   #+end_quote
+   #+ATTR_LATEX: :width 10cm
+   [[./gaugan_disc.png]]
 * 訓練・推論手法
 * 実験
 * 結果
