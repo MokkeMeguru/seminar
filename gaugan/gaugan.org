@@ -195,11 +195,11 @@ We train the generator with the same multi-scale discriminator and loss function
    \min_{G} \max_{D_1, D_2} \Sigma_{k=1,2} L_{GAN}(G, D_k)
    \end{eqnarray*}
    
-   但し本論文では Pix2PixHD とは違い $L_{GAN}(G, D)$ は Hinge 関数を用いた 次の式で表します。但し $L_{GAN}(\hat(G), D)$ は Discriminator のパラメータ更新時、 $L_{GAN}(G, \hat(D))$ は Generator のパラメータ更新時の損失関数になります。Appendix で議論されていますが、Hinge 関数を用いたほうが評価が向上するようです。
+   但し本論文では Pix2PixHD とは違い $L_{GAN}(G, D)$ は Hinge 関数を用いた 次の式で表します。但し $L_{GAN}(\hat{G}, D)$ は Discriminator のパラメータ更新時、 $L_{GAN}(G, \hat{D})$ は Generator のパラメータ更新時の損失関数になります。Appendix で議論されていますが、Hinge 関数を用いたほうが評価が向上するようです。
    
    \begin{eqnarray*}
-   L_{GAN}(\hat(G), D) &=& E_{x\sim q_{data}(x)} [min(0, -1 + D(x))] + E_{z \sim p(z)} [min (0, -1 - D(\hat{G}(z)))] \\
-   L_{GAN}(G, \hat(D)) &=& - E_{z\sim p(z)} [\hat{D}(G(z))]
+   L_{GAN}(\hat{G}, D) &=& E_{x\sim q_{data}(x)} [min(0, -1 + D(x))] + E_{z \sim p(z)} [min (0, -1 - D(\hat{G}(z)))] \\
+   L_{GAN}(G, \hat{D}) &=& - E_{z\sim p(z)} [\hat{D}(G(z))]
    \end{eqnarray*}
    
    ちなみに Pix2PixHD での $L_{GAN}(G, D)$ は次の式です。

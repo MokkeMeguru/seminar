@@ -1,4 +1,4 @@
-% Created 2020-01-10 Fri 19:03
+% Created 2020-01-10 Fri 19:50
 % Intended LaTeX compiler: pdflatex
 \documentclass[a4paper, dvipdfmx, 10pt]{article}
 \usepackage[utf8]{inputenc}
@@ -42,7 +42,7 @@
 
 
 \section{導入}
-\label{sec:org38dc334}
+\label{sec:org2748045}
 GauGAN [1] というのは 2019 年画像生成系の分野を賑わせた新たな Normalization (正規化) 手法についての論文で、NVIDIAの研究成果になります。website [2] でそのデモを体験することが出来、日本でも深層学習をやっている人たちが盛り上がっていたイメージです。\\
 あと \textbf{\textbf{実装が PyTorch なので}} 大変読みやすく、バグがないです。\\
 \begin{center}
@@ -54,7 +54,7 @@ GauGAN [1] というのは 2019 年画像生成系の分野を賑わせた新た
 [2]: \href{https://github.com/NVlabs/SPADE}{Github}\\
 
 \section{GauGAN の取り組む問題}
-\label{sec:orgb5f0f44}
+\label{sec:org3ca2c4c}
 GauGAN が取り組むタスクは Semantic Image Synthesis というものです。こは簡単に言ってしまうと \textbf{\textbf{こんな感じの画像を作りたい}} というイメージから \textbf{\textbf{写真のような画像}} を生成することを指し、パッとWebの背景画像を作りたいとか、ゲームの画像を作りたいとかいった場面で役に立ちます。\\
 
 本研究の Semantice Image Synthesis において、入力は概形を描いたセグメンテーション画像 (色分けした画像) であり、出力は写真のような画像、となっています。関連研究としては、例えば入力が単語であったりする場合があります。\\
@@ -66,7 +66,7 @@ GauGAN が取り組むタスクは Semantic Image Synthesis というもので�
 \end{center}
 
 \section{Normalization とは何か}
-\label{sec:org97ad408}
+\label{sec:org775b259}
 Normalization (正規化) とは雑に言うと \(\bm{x}\) の値域を \(\bm{x'}\) へ変換することを指します。 \textbf{\textbf{変換前後の次元的に言うと、 \(f: \mathbb{R}^{H \times W \times C} \rightarrow \mathbb{R}^{H \times W \times C}\) です}} 。\\
 画像データ \(\mathbb{R}^{N \times H \times W \times C}\) (\(N\) : バッチサイズ、 \(H\) : 画像の高さ、 \(W\) : 画像の幅、 \(C\) : 画像のチャンネル ) を例にすると、次のようなものが例として挙げることが出来ます。\\
 \begin{itemize}
@@ -100,11 +100,11 @@ ActNorm の \(\mu_{init}, \sigma^2_{init}\)  は、初期バッチで初期化�
 
 [4]: \href{https://arxiv.org/pdf/1803.08494.pdf}{Group Normalization}\\
 \section{SPADE (Spatially-Adaptive (DE)normalization)}
-\label{sec:orgf6161c4}
+\label{sec:org684f0ab}
 GauGANでは Normalization について新たな手法 SPADE (Spatially-Adaptive (DE)normalization) を提案しました。\\
   特にこの Normalization は Conditional Normalization の一種としてみなされます。Conditional Normalization の関連手法としては Conditional Batch Normalization や AdaIN を挙げることが出来ます。これらは外部のデータを用いた手法であり、この手順は (1)  BatchNormalization などの手法で 平均 0, 分散 1 へ正規化を行い \(x\) を獲得 、(2) 外部のデータを用いてアフィン変換 \(ax + b\) を行う、というものになっています。先行研究でのアフィン変換のパラメータ \(a, b\) はベクトルであったりスカラーであったりいろいろですが、SPADE ではここにセグメンテーション画像を用いました。\\
 \subsection{SPADE のコンセプト}
-\label{sec:orgb90f62b}
+\label{sec:org356d411}
 \begin{quote}
 their normalization layers tend to “wash away” information contained in the input semantic masks.\\
 --- quoted from page 2 line 1\\
@@ -120,7 +120,7 @@ SPADEのコンセプトは、 \textbf{\textbf{BatchNormalization らが "wash aw
 \end{center}
 
 \subsection{SPADE の細かい話}
-\label{sec:org82dd5de}
+\label{sec:org220a221}
 次に細かい話としてSPADE の入力と出力を示しましょう。前提として、SPADE は BatchNormalization に合わせて モデルの複数ヶ所に適用されるので、それぞれの SPADE を \(i\) で区別します。\\
 
 SPADEの入力はセグメンテーション画像で、セグメンテーションラベルは \href{https://github.com/NVlabs/SPADE/issues/29}{one-hot vector になっており} 、 つまりこれがいわゆるセグメンテーション画像の \(C\) になります。これが \(H^{i} \times W^{i}\) 個あるので、結局 SPADE の入力は　\(m\in (\mathbb{L}^{H^{i}\times W^{i}} = \mathbb{R}^{H^{i} \times W^{i} \times {C^{i}}'})\) となります。 \(\beta^{i}, \gamma^{i}\) をそれぞれ後述する式で求めます。\\
@@ -145,7 +145,7 @@ h^{i} &\in& \mathbb{R}^{N \times H^{i} \times W^{i} \times C^{i}}\\
 
 雑な発想ですと、セグメンテーション画像をそのままペッと \(\cfrac{h^{i}-\mu^{i}}{\sigma^i}\) へ貼っているイメージでしょうか。こうすることで Batch Normalization で落としてしまったであろう情報を復元できるというわけです。\\
 \section{モデルの全容}
-\label{sec:orgc52969d}
+\label{sec:orgd207fe6}
 本研究で特にセグメンテーション画像を使っている部分は一般的なGANs でいう Generator と Discriminator の部分なので、これらについて概形→詳細、と詰めて見てみましょう。\\
 
 \begin{center}
@@ -153,7 +153,7 @@ h^{i} &\in& \mathbb{R}^{N \times H^{i} \times W^{i} \times C^{i}}\\
 \end{center}
 
 \subsection{Generator}
-\label{sec:org0fde060}
+\label{sec:org05be9c8}
 最終的な出力が \(N \times H \times W \times C = 256 \times 512 \times 512 \times 3\) の画像となる Generator を下に引用します。\\
 
 \texttt{SPADE ResBlk(K)} は入力を \(N \times H^{i} \times W^{i} \times C^{i}\) の入力を受け取り \(N \times H^{i} \times W^{i} \times K\) を出力します。そして \texttt{Upsample(2)} は \(N\times H^{i} \times W^{i} \times K\) を入力として \(N \times 2H^{i} \times 2W^{i}  \times K\) を出力とします。例として、上から1つ目の  \texttt{SPADE ResBlk(1024), Upsample(2)} は、 \(N \times 4 \times 4 \times 1024\) を入力として \(N \times 8 \times 8 \times 1024\) を出力とします。(以降バッチサイズ \(N\) を省略)\\
@@ -161,7 +161,7 @@ h^{i} &\in& \mathbb{R}^{N \times H^{i} \times W^{i} \times C^{i}}\\
 \includegraphics[width=10cm]{./gaugan_gen.png}
 \end{center}
 \subsubsection{SPADE ResBlk}
-\label{sec:org709fbc6}
+\label{sec:orgfd736f6}
 SPADE ResBlk については、下に引用される図で説明します。ResNet を元にしていますが、入力と出力の次元数が異なっている点に注意して下さい。簡単な構造は ResNet と変わっていませんが、正規化層がそのまま SPADE に置き換わっており、SPADEのための入力であるセグメンテーション画像が外部から与えられていることがわかると思います。\\
  　 \texttt{SxSConv-K} は カーネルサイズ \(S\) フィルタサイズ \(K\) の畳み込みを示しており、\(H\times W\times C\) のTensorを入力として \(H \times W \times K\) の Tensor を出力とします。\\
 \begin{center}
@@ -169,7 +169,7 @@ SPADE ResBlk については、下に引用される図で説明します。ResN
 \end{center}
 
 \subsubsection{SPADE}
-\label{sec:org021f70c}
+\label{sec:orgcfafbe8}
 SPADE そのものについては、下に引用される図で説明します。ここで注意してほしいのは、SPADEそのものは \textbf{\textbf{入力と出力で次元数が変わらない＝通常のNormalizationと同じ}} という点です。すると問題になるのが、 \textbf{\textbf{セグメンテーション画像をどう扱うか}} です。\\
 　セグメンテーション画像は一枚の \(H'\times W' \times C' = 512 \times 512 \times C'\) で共通であり、これは SPADE に入ってくるデータの次元数 \(H^{i} \times W^{i} \times C^{i}\) とは異なります。 \(C\) については畳み込みレイヤーでどうとでもなるのですが (3x3-Conv-k で変えられる) \(H, W\) についてはそうはいきません。なので SPADE では Resize を使って \(H, W\) の変換を行います。\\
 
@@ -178,7 +178,7 @@ SPADE そのものについては、下に引用される図で説明します�
 \end{center}
 
 \subsection{Discriminator}
-\label{sec:org3c30ff8}
+\label{sec:org0b11f62}
 Discriminator は Pix2PixHD と同等の機能を持っています。この Discriminator の図がわかりにくいので簡単に Pix2PixHD から引用を行いながら説明を行います(というか既存の解説記事はこのあたりの話雑すぎませんか？)。\\
 
 Discriminator への入力は (1) セグメンテーション画像と実際の画像のペア(真) (2) セグメンテーション画像と生成画像のペア(偽) に \href{https://github.com/NVlabs/SPADE/blob/master/models/pix2pix\_model.py\#L205-L219}{なって}おり、これらを区別することが Discriminator の役割になっています。\\
@@ -209,7 +209,7 @@ Without the multi-scale discriminators, we observe that many repeated patterns o
 \includegraphics[width=10cm]{./gaugan_disc2.png}
 \end{center}
 \section{訓練・推論手法}
-\label{sec:orge29a29f}
+\label{sec:org1503b72}
 \begin{quote}
 We train the generator with the same multi-scale discriminator and loss function used in pix2pixHD [48] except that we replace the least squared loss term [34] with the hinge loss term [31,38,54].\\
 --- quoted from page 3 column 2\\
@@ -230,11 +230,11 @@ L_{KLD} = D_{KL} (q(z|x) || p(z))
 \min_{G} \max_{D_1, D_2} \Sigma_{k=1,2} L_{GAN}(G, D_k)
 \end{eqnarray*}
 
-但し本論文では Pix2PixHD とは違い \(L_{GAN}(G, D)\) は Hinge 関数を用いた 次の式で表します。但し \(L_{GAN}(\hat(G), D)\) は Discriminator のパラメータ更新時、 \(L_{GAN}(G, \hat(D))\) は Generator のパラメータ更新時の損失関数になります。Appendix で議論されていますが、Hinge 関数を用いたほうが評価が向上するようです。\\
+但し本論文では Pix2PixHD とは違い \(L_{GAN}(G, D)\) は Hinge 関数を用いた 次の式で表します。但し \(L_{GAN}(\hat{G}, D)\) は Discriminator のパラメータ更新時、 \(L_{GAN}(G, \hat{D})\) は Generator のパラメータ更新時の損失関数になります。Appendix で議論されていますが、Hinge 関数を用いたほうが評価が向上するようです。\\
 
 \begin{eqnarray*}
-L_{GAN}(\hat(G), D) &=& E_{x\sim q_{data}(x)} [min(0, -1 + D(x))] + E_{z \sim p(z)} [min (0, -1 - D(\hat{G}(z)))] \\
-L_{GAN}(G, \hat(D)) &=& - E_{z\sim p(z)} [\hat{D}(G(z))]
+L_{GAN}(\hat{G}, D) &=& E_{x\sim q_{data}(x)} [min(0, -1 + D(x))] + E_{z \sim p(z)} [min (0, -1 - D(\hat{G}(z)))] \\
+L_{GAN}(G, \hat{D}) &=& - E_{z\sim p(z)} [\hat{D}(G(z))]
 \end{eqnarray*}
 
 ちなみに Pix2PixHD での \(L_{GAN}(G, D)\) は次の式です。\\
@@ -258,13 +258,13 @@ Pix2PixHD で追加されている(論文の 4. Results 10行目あたりにし�
 \end{enumerate}
 
 \section{実験}
-\label{sec:org8ff2faf}
+\label{sec:org1b7f3b1}
 COCO-dataset などなどで訓練し、その評価を Pix2PixHD やいくつかのモデルで比較しました。またどの部分が強い影響を与えているのかを比較するために Pix2PixHD に提案手法のいくつかを組み込んだモデルで性能の向上度合いを比較しました。\\
 
 評価手法は、mIoU(mean Intersection over-Union, 生成画像と実際の画像の領域的一致度。おそらく生成画像をセグメンテーションして、元のセグメンテーションとどのくらい一致しているのか、という測り方です) と accuracy(生成画像と実際の画像との差)、FID(生成画像群と元の画像群がどのくらい似ているのか) の3つです。多分FIDだけで良いのでは？という気もしますが結構いろいろな面から眺めていますね。\\
 
 \section{結果}
-\label{sec:org686af5a}
+\label{sec:org90420de}
 Pix2PixHDよりも良い性能が達成できました。\\
 
 \begin{center}
@@ -277,14 +277,14 @@ Pix2PixHDよりも良い性能が達成できました。\\
 \includegraphics[width=10cm]{./result2.png}
 \end{center}
 \section{論文のアブストラクトの和意訳}
-\label{sec:org6ba2ab0}
+\label{sec:orgab6545a}
 \begin{verbatim}
 セグメンテーション画像を与え写真のような画像が生成するモデルで有効な、シンプルかつ強力なレイヤーである SPADE を提案するよ。以前の手法ではセグメンテーション画像をモデルに入れて出力に写真のような画像を取り出す、というものが一般的だったけど、これだと途中の層にある Normalization レイヤーがセグメンテーション画像の意味情報 (Semantic information) を”洗い流してしまう”傾向があるんだ。だから SPADE によって Normalization レイヤの出力を変換することを提案するよ。
 複数のデータセットで実験をしたら、視覚的な良さや入力のセグメンテーションの反映度について先行研究に比べて良い性能を示していることがわかったよ。更にこの手法はセグメンテーションとスタイルのそれぞれをユーザが制御できるようになっているんだ。コードは Github にあるよ。
 \end{verbatim}
 
 \section{読んだ感想とか}
-\label{sec:org57241dc}
+\label{sec:orgb68a5b8}
 Normalization が落としてしまう情報、というのに注目した面白い研究だと思います。そういえば ResNet も残差をくっつけているので落としてしまう情報、という観点では似ているのかな、と思いました。\\
 
 この論文のすごいところは、NVIDIA のインターン生が First Author になっていたことだと思っています。画像生成の研究では概して大量の計算機が必要になるので、彼のムーブは最適解ではありますが、よく通ったなぁっていう顔をしています。\\
