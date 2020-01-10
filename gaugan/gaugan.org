@@ -221,7 +221,6 @@ We train the generator with the same multi-scale discriminator and loss function
    \lambda \Sigma_{i=1}^{N} \cfrac{1}{M_i} [||F^{(i)}(x) - F^{(i)}(G(s)) ||_1]
    \end{eqnarray*}
 
-
 * 実験
   COCO-dataset などなどで訓練し、その評価を Pix2PixHD やいくつかのモデルで比較しました。またどの部分が強い影響を与えているのかを比較するために Pix2PixHD に提案手法のいくつかを組み込んだモデルで性能の向上度合いを比較しました。
 
@@ -237,10 +236,18 @@ We train the generator with the same multi-scale discriminator and loss function
 
   #+ATTR_LATEX: :width 10cm
   [[./result2.png]]
-* 論文のアブストラクト・イントロダクションの和意訳
-  アブストラクト
-#+begin_example
-
+* 論文のアブストラクトの和意訳
+  #+begin_example
+セグメンテーション画像を与え写真のような画像が生成するモデルで有効な、シンプルかつ強力なレイヤーである SPADE を提案するよ。以前の手法ではセグメンテーション画像をモデルに入れて出力に写真のような画像を取り出す、というものが一般的だったけど、これだと途中の層にある Normalization レイヤーがセグメンテーション画像の意味情報 (Semantic information) を”洗い流してしまう”傾向があるんだ。だから SPADE によって Normalization レイヤの出力を変換することを提案するよ。
+複数のデータセットで実験をしたら、視覚的な良さや入力のセグメンテーションの反映度について先行研究に比べて良い性能を示していることがわかったよ。更にこの手法はセグメンテーションとスタイルのそれぞれをユーザが制御できるようになっているんだ。コードは Github にあるよ。
 #+end_example
-* 読んだ感想とか
 
+* 読んだ感想とか
+  Normalization が落としてしまう情報、というのに注目した面白い研究だと思います。そういえば ResNet も残差をくっつけているので落としてしまう情報、という観点では似ているのかな、と思いました。
+
+  この論文のすごいところは、NVIDIA のインターン生が First Author になっていたことだと思っています。画像生成の研究では概して大量の計算機が必要になるので、彼のムーブは最適解ではありますが、よく通ったなぁっていう顔をしています。
+
+  あとは個人的な直感ですが、Multi-Scale が最近のはやりなのかなぁと思っています。僕は GANs よりも VAE/Flow 系が好みなんですが、最近の VQ-VAE2 なんかも確率空間への写像を Multi-Scale にしていましたし、 Flow-based Model の新しめの手法である [[https://arxiv.org/pdf/1810.01367.pdf][FFJORD]] や Glow なんかも Multi-Scale Architecture を用いています。もっとふわっとした直感としては、VAEの正規分布に従わせる項ってKL-collapse やらなんやらで最近(自然言語処理界隈系から)良い話を聞いていないなぁと思いました。
+  
+  #+ATTR_LATEX: :width 10cm
+  [[./multi-scale.png]]
