@@ -1,0 +1,159 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:t ^:t arch:headline author:t
+#+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+options: tasks:t tex:t timestamp:t title:t toc:t todo:t |:t
+#+title: 強力なNormalization手法、GauGAN (SPADE) を読む
+#+date: <2019-04-24 Wed>
+#+author: MokkeMeguru
+#+email: meguru.mokke@gmail.com
+#+language: ja
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 25.2.2 (Org mode 9.2.2)
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [a4paper, dvipdfmx, 10pt]
+#+LATEX_HEADER: \usepackage{amsmath, amssymb, bm}
+#+LATEX_HEADER: \usepackage{graphics}
+#+LATEX_HEADER: \usepackage{color}
+#+LATEX_HEADER: \usepackage{times}
+#+LATEX_HEADER: \usepackage{longtable}
+#+LATEX_HEADER: \usepackage{minted}
+#+LATEX_HEADER: \usepackage{fancyvrb}
+#+LATEX_HEADER: \usepackage{indentfirst}
+#+LATEX_HEADER: \usepackage{pxjahyper}
+#+LATEX_HEADER: \usepackage[utf8]{inputenc}
+#+LATEX_HEADER: \usepackage[backend=biber, bibencoding=utf8]{biblatex}
+#+LATEX_HEADER: \usepackage[top=20truemm, bottom=25truemm, left=25truemm, right=25truemm]{geometry}
+#+LATEX_HEADER: \hypersetup{colorlinks=false, pdfborder={0 0 0}}
+#+LATEX_HEADER: \usepackage{ascmac}
+#+LATEX_HEADER: \usepackage{algorithm}
+#+LATEX_HEADER: \usepackage{algorithmic}
+#+LATEX_HEADER: \addbibresource{./qareport.bib}
+#+DESCRIPTION:
+#+KEYWORDS:
+#+STARTUP: indent overview inlineimages
+
+* 導入
+  GauGAN [1] というのは 2019 年画像生成系の分野を賑わせた新たな Normalization (正規化) 手法についての論文で、NVIDIAの研究成果になります。website [2] でそのデモを体験することが出来、日本でも深層学習をやっている人たちが盛り上がっていたイメージです。
+  あと **実装が PyTorch なので** 大変読みやすく、バグがないです。
+#+ATTR_LATEX: :width 18cm
+[[./gaugan_image.png]]
+
+[1]: [[https://arxiv.org/abs/1903.07291][Semantic Image Synthesis with Spatially-Adaptive Normalization]]
+
+[2]: [[https://github.com/NVlabs/SPADE][Github]]
+
+* GauGAN の取り組む問題
+  GauGAN が取り組むタスクは Semantic Image Synthesis というものです。こは簡単に言ってしまうと **こんな感じの画像を作りたい** というイメージから **写真のような画像** を生成することを指し、パッとWebの背景画像を作りたいとか、ゲームの画像を作りたいとかいった場面で役に立ちます。
+
+本研究の Semantice Image Synthesis において、入力は概形を描いたセグメンテーション画像 (色分けした画像) であり、出力は写真のような画像、となっています。関連研究としては、例えば入力が単語であったりする場合があります。
+
+本研究で用いたデータセットの一つとして [[https://github.com/nightrome/cocostuff][COCO-Stuff dataset]] があります。これは写真データと、そのセグメンテーション画像がペアになっています。本来的には COCO-Stuff は写真データ -> セグメンテーション画像、というふうな学習を目的としたデータセットなのですが、本研究ではその逆を行なっている点に注意して下さい。
+
+#+ATTR_LATEX: :width 18cm
+[[./coco.png]]
+
+* Normalization とは何か
+  Normalization (正規化) とは雑に言うと $\bm{x}$ の値域を $\bm{x'}$ へ変換することを指します。 **変換前後の次元的に言うと、 $f: \mathbb{R}^{H \times W \times C} \rightarrow \mathbb{R}^{H \times W \times C}$ です** 。
+  画像データ $\mathbb{R}^{N \times H \times W \times C}$ ($N$ : バッチサイズ、 $H$ : 画像の高さ、 $W$ : 画像の幅、 $C$ : 画像のチャンネル ) を例にすると、次のようなものが例として挙げることが出来ます。
+ - BatchNormalization
+
+    $C$  について $\mu = 0$ ,  $\sigma = 1$ への正規化をします。このとき平均・分散の求め方は $\mu_B = \cfrac{1}{N  H  W}\Sigma X_{n, h, w}$ $\sigma^2_B = \cfrac{1}{N  H  W}\Sigma (X_{n, h, w} - \bar{X)}^2 \in \mathbb{R}^{C}$  のようになります。(バッチサイズ $N$ が存在していることに注意)
+
+    正規化の式について簡単に取り上げると、一枚画像 $x$ の $C$ 軸について $\hat{x_i} = \cfrac{1}{\sigma_B}(x_i- \mu_B), x_i \in \mathbb{R}^{C}$ となります。(但し実装や性能向上のために、実際はもっと複雑な式が用いられます。)
+- InstanceNormalization
+  
+  $C$ について  $\mu = 0$ ,  $\sigma = 1$ への正規化をします。但しこのときの平均・分散の求め方は $\mu_I = \cfrac{1}{HW}\Sigma x_{h, w}$ $\sigma^2_I  = \cfrac{1}{HW} \Sigma (x_{h, w} - \bar{x})^2$ のようになります。Batch Normalization が画像データ群全体で $C$ が $\mu=0, \sigma^2=1$ となるようにしているのに対して Instance Normalization が 一枚の画像について $\mu=0, \sigma^2=1$ に正規化している点が主な違いです。
+- ActNorm
+
+  ActNorm は Glow[3] で提案された Normalization で、これは **まず** 初期バッチ $X_B = {x_1, x_2, ..., x_n}$ について、次の式に従うようにして $C$ について  $\mu = 0$ ,  $\sigma = 1$ への正規化を行います。
+
+  $\mu_{init} = \cfrac{1}{NHW} \Sigma X_{n, h, w}, \sigma^2_{init} = \cfrac{1}{NHW} \Sigma (X_{n, h,w} - \bar{X})^2 \in \mathbb{R}^{C}$
+
+  ActNorm の $\mu_{init}, \sigma^2_{init}$  は、初期バッチで初期化された後、特に $C$ について正則化をするという制約をかけられず、ただの訓練パラメータとして用いられます。つまりこの Normalization は $\mu = 0$ ,  $\sigma = 1$ への変換ではないという点に注意して下さい。
+
+#+ATTR_LATEX: :width 15cm
+[[./normalization.png]]
+
+正規化について直感的な図を Group Normalization [4] から引用しましょう。例えば BatchNormalization の場合、青い部分がシュッとなって $\mu_{B_i}, \sigma^2_{B_i}$ となります。これが $C$ 個出来るので、 $\mu_B \in \mathbb{R}^{C}$ です。Instance Normalization は同様に考えると $\mathbb{R}^{C B}$ ですが、バッチ軸についてはまとめ上げられるので $\mathbb{R}^{C}$ となります。
+
+
+[3]: [[https://arxiv.org/abs/1807.03039][Glow: Generative Flow with Invertible 1x1 Convolutions]]
+
+[4]: [[https://arxiv.org/pdf/1803.08494.pdf][Group Normalization]]
+* SPADE (Spatially-Adaptive (DE)normalization)
+GauGANでは Normalization について新たな手法 SPADE (Spatially-Adaptive (DE)normalization) を提案しました。
+  特にこの Normalization は Conditional Normalization の一種としてみなされます。Conditional Normalization の関連手法としては Conditional Batch Normalization や AdaIN を挙げることが出来ます。これらは外部のデータを用いた手法であり、この手順は (1)  BatchNormalization などの手法で 平均 0, 分散 1 へ正規化を行い $x$ を獲得 、(2) 外部のデータを用いてアフィン変換 $ax + b$ を行う、というものになっています。先行研究でのアフィン変換のパラメータ $a, b$ はベクトルであったりスカラーであったりいろいろですが、SPADE ではここにセグメンテーション画像を用いました。
+** SPADE のコンセプト
+#+begin_quote
+their normalization layers tend to “wash away” information contained in the input semantic masks. 
+--- quoted from page 2 line 1
+#+end_quote
+
+   SPADEのコンセプトは、 **BatchNormalization らが "wash away(洗い流す)"  する内容を復元する** ということです。そして彼らは復元する情報源として **セグメンテーション画像** を使いました。
+
+   直感的な説明をしましょう。例えばセグメンテーション画像からハワイの海岸の画像を生成しようとするとき、海の部分と砂浜の部分を同じように平均 0,  分散 1 にされてしまうと (ここで Batch Normalization が $C$ について正規化されているという点を思い出してみましょう) 情報落ちてない？となるわけです。ここで Conditional Normalization をして情報補完をしてみよう→どうやって補完する？→そういえばセグメンテーション画像なんてものがあるな、みたいな感じに発想を進めていくことが出来ます(いや彼らがそう思っているかは知りませんが)。
+
+下の画像が SPADE のレイヤーの概要です。確かに (1) BatchNormalization (2) セグメンテーション画像から $\gamma, \beta$ を用いてアフィン変換、をしていますね。
+#+ATTR_LATEX: :width 10cm
+[[./spade_abst.png]]
+
+** SPADE の細かい話
+  次に細かい話としてSPADE の入力と出力を示しましょう。前提として、SPADE は BatchNormalization に合わせて モデルの複数ヶ所に適用されるので、それぞれの SPADE を $i$ で区別します。
+
+  SPADEの入力はセグメンテーション画像で、セグメンテーションラベルは [[https://github.com/NVlabs/SPADE/issues/29][one-hot vector になっており]] 、 つまりこれがいわゆるセグメンテーション画像の $C$ になります。これが $H^{i} \times W^{i}$ 個あるので、結局 SPADE の入力は　$m\in (\mathbb{L}^{H^{i}\times W^{i}} = \mathbb{R}^{H^{i} \times W^{i} \times C^{i}})$ となります。 $\beta^{i}, \gamma^{i}$ をそれぞれ後述する式で求めます。
+  それはそれとして、BatchNormalization Layer から $\mu^{i}, \sigma^{i}$ をそれぞれ用意しておきます。
+
+  BatchNormalization Layer に入ってくる Tensor $h^{i}$ と $\mu^{i}, \sigma^{i}, \beta^{i}, \gamma^{i}$ から $h^{i}$ -> [BN -> SPADE] -> ${h^i}'$ は 次の式で表すことが出来ます。
+  
+\begin{eqnarray*}
+{h^i}' = \gamma^i \cfrac{h^{i} - \mu^{i}}{\sigma^{i}} + \beta^{i}
+\end{eqnarray*}
+
+  ここであれ？って思える人は深層学習の実装に向いています。そう、この式ですと次元数があんまりよくわかんないです。なので、詳しく次元数を書いてみます。
+
+\begin{eqnarray*}
+, where\\
+h^{i} &\in& \mathbb{R}^{N \times H^{i} \times W^{i} \times C^{i}}\\ 
+\mu^{i}, \sigma^{i} &\in& \mathbb{R}^{C^{i}} \\
+ \gamma^{i}, \beta^{i} &\in& \mathbb{R}^{H^{i} \times W^{i} \times C^{i}}
+\end{eqnarray*}
+  
+つまり Batch Normalization が $C^{i}$ について正規化が行われているのに対して、SPADE は $H^{i}, W^{i}, C^{i}$ について正規化が行われています。
+
+雑な発想ですと、セグメンテーション画像をそのままペッと $\cfrac{h^{i}-\mu^{i}}{\sigma^i}$ へ貼っているイメージでしょうか。こうすることで Batch Normalization で落としてしまったであろう情報を復元できるというわけです。
+* モデルの全容
+本研究で特にセグメンテーション画像を使っている部分は一般的なGANs でいう Generator と Discriminator の部分なので、これらについて概形→詳細、と詰めて見てみましょう。
+   
+#+ATTR_LATEX: :width 10cm
+   [[./gaugan_full.png]]
+
+** Generator
+   最終的な出力が $N \times H \times W \times C = 256 \times 512 \times 512 \times 3$ の画像となる Generator を下に引用します。
+   
+   ~SPADE ResBlk(K)~ は入力を $N \times H^{i} \times W^{i} \times C^{i}$ の入力を受け取り $N \times H^{i} \times W^{i} \times K$ を出力します。そして ~Upsample(2)~ は $N\times H^{i} \times W^{i} \times K$ を入力として $N \times 2H^{i} \times 2W^{i}  \times K$ を出力とします。例として、上から1つ目の  ~SPADE ResBlk(1024), Upsample(2)~ は、 $N \times 4 \times 4 \times 1024$ を入力として $N \times 8 \times 8 \times 1024$ を出力とします。(以降バッチサイズ $N$ を省略)
+   #+ATTR_LATEX: :width 10cm
+   [[./gaugan_gen.png]]
+*** SPADE ResBlk
+    SPADE ResBlk については、下に引用される図で説明します。ResNet を元にしていますが、入力と出力の次元数が異なっている点に注意して下さい。簡単な構造は ResNet と変わっていませんが、正規化層がそのまま SPADE に置き換わっており、SPADEのための入力であるセグメンテーション画像が外部から与えられていることがわかると思います。
+     　 ~SxSConv-K~ は カーネルサイズ $S$ フィルタサイズ $K$ の畳み込みを示しており、$H\times W\times C$ のTensorを入力として $H \times W \times K$ の Tensor を出力とします。
+    #+ATTR_LATEX: :width 10cm
+   [[./SPADE_ResBlk.png]]
+
+*** SPADE
+    SPADE そのものについては、下に引用される図で説明します。
+
+    
+
+** Discriminator
+   
+* 訓練・推論手法
+* 実験
+* 結果
+* 論文のアブストラクト・イントロダクションの和意訳
+  アブストラクト
+#+begin_example
+
+#+end_example
+* 読んだ感想とか
+
