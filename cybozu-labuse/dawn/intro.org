@@ -1,0 +1,170 @@
+* Dawn
+  2017 ~ 2022 年までのプロジェクト
+  Stanford 大学 がホスト。GoogleとかNEC (!) が噛んでいるらしい
+
+** DAWN の意味
+ 1. 夜明け
+ 2. Data Analytics for What's Next
+
+* 背景
+
+** 割と注目している内容
+   機械学習は革新的に私達の生活を変えているけど、機械学習は大変
+
+   Ex.
+ 1. データを集めるのが大変
+
+    犬の画像を特定するだけでも沢山のラベル付きデータが必要
+    →画像からがんを見つけるためにはもっとたくさんデータがいる
+ 2. プロダクトを提供するのが大変
+
+    大規模な計算機とか、保守とか、スケーリングとか
+ 3. 必要なものが多すぎる
+
+     domain expert, data scientists data engineers and DevOps(開発と運営の連携、という意味で用いている)
+
+* 目的
+  End-to-End な機械学習開発環境の提供
+
+  End-to-End?
+  深層学習分野の End-to-End とはちょっと意味が違う
+  
+  - やりたいこと
+
+     チームが小さかったり、機械学習エンジニアがいなかったりしても回る環境
+  - やらないこと
+
+      新しいアルゴリズムを開発してSOTAを取ること
+  
+** 主張
+#+begin_example
+How can we enable anyone with domain expertise to build their own production-quality data products
+#+end_example
+  
+簡単に言うと、 *博士号引っさげたつよつよ人材やビッグデータ、分散システム、最新ハードの知見がないと機械学習のプロダクトをまともにやることって難しいよね？* 
+
+不可能のように思えるけど、実際はそんなことはない。例えば テキストの検索技術は洗練されたアルゴリズムとデータ構造の両方が必要なすごく複雑な分野だったけど、今では誰もが使える技術（例えばWeb検索）としてそこにある。ライブラリとしても Solr なんかの便利なツールはもう出回っている。
+  
+** キーワード
+   data preparation, feature selection and extraction, and productionization
+  
+- data preparation  
+
+     機械学習するのに必要なデータの前処理をする。データの取り出しとかクリーニングとかラベル付とか。
+
+- feature selection & extraction
+  
+     データの特徴量を抽出する。domain expert がデータのどこに注目しているのかを見つける部分。
+
+- productionization 
+
+    プロダクトのデプロイ、監視、デバッグを行なう。その機械学習モデルをきちんと動作させ、変な動作をしたときにそれを改善できるようにする
+* Usable ML のための DAWN project / System 
+  3 つの柱
+  1) target end-to-end ML workflows
+
+     現状の機械学習アプリケーションの問題は、モデルの訓練についてではなく、データの前処理や特徴量抽出、そして製品化(提供、監視、デバッグなどなど)
+       
+     これらを通すことができる、ように End-to-End なフレームワークを提供します。(ここが深層学習のそれとは意味が違うので混乱しないように)
+  2) Empower domain experts
+       
+     ドメインの専門家を支援する（つまり機械学習の専門家ではなく）
+     近年の機械学習プロダクトで高い性能を得られているものは、機械学習エンジニアが凄いんじゃなくて、その問題についての分野の専門家が凄い。ドメインの専門家と機械学習とを近づけられるように支援していきたい。例えばラベリングとかデータ拡張(data augmentation )とか
+
+  3) Optimize end-to-end
+
+     ハードウェアエンジニアリングによって既存の機械学習のツールの実行速度を底上げすることで、実用に耐えられるようにする。
+* DAWN プロジェクトとしてこれから研究する内容
+
+    1. 機械学習のための新しいインターフェース 
+
+       機械学習エンジニアでないドメインの専門家が扱えるような、便利なツール。これによって機械学習モデルの構築から監視までをシステムが一手に引き受ける。
+       - 観察可能な機械学習を通して、簡単にモデルを構築できるようにする(data preparation, feature engineering)
+
+         但しモデル構築は深層学習エンジニアの考えるそれ（Conv層がいくつ、とか）とは大分意味が違う。
+         例えばテキスト分類の場合、データを観察して、いくつかの正規表現のようなルールをモデルに組み込む仕組んで、それを元にして大規模なデータを分類するためのモデルを作り、結果を観察してルールを更新して...というようなものです。(この辺りDeepDiveの仕組み) 
+         DAWN では data programing と呼ばれる新しいパラダイムを作ります。これは (1). ラベルの正当性を評価し、ルールのノイズを除去する教師なしモデル。(2) いくつかのルールからラベルを推定し、その確率的ラベルを用いた教師ありモデル。の二つから構成されるシステムです。
+         これの初期段階として、 Snorkel を用いて低品質なルールから高品質な分類モデルを獲得できました。(Snorkel や Google はこれを weakly supervised learning と呼んでいます。) また最近では分類だけでなく特徴抽出や、構造学習のためにこの weakly supervised learning を行っています。
+       - 人にモデルが求める結果を説明可能にする(feature engineering, productionization)
+
+         大規模かつ複雑なモデルは良い結果を返すけど、そのモデルがなぜその結果を返したのかを説明することは困難。なのでブラックボックス下で訓練されるようなモデルは使わないようにしよう(?!)
+         #+begin_example
+         One promising approach is that ML predictions are not made in a vacuum: each user has tens to hundreds
+of attributes that can be used to segment, correlate, and contextualize predictions 
+         -- quoated from page 4 , line 4 in paper https://arxiv.org/pdf/1705.07538.pdf
+         #+end_example
+       - デバッグと観察のしやすさの重視  (feature engineering, productionization)
+
+          現実世界は進歩しても機械学習モデルにはそれに応じて勝手に進化してくれるわけではないので、定期的にアップデートする必要があります。このため、モデルの品質を監視するためのツールの作成が必要です。この問題は特に幅広いユーザ、デバイスで用いられるモデルであればあるほど重要であり、これをプロダクトのインターフェース、モデルの訓練の両面から改善するようなシステムが求められます。
+       - データの品質の評価と強化 (data preparation, feature engineering)
+
+         高品質なモデルには高品質なデータが必要です。
+         非構造、構造にかかわらずより多くのデータソースが得られるに伴って、モデル構築のためのデータ抽出の技術が必要になってきます。しかし様々なデータソースの中で、それぞれのデータの程度信頼性や、人手ないし既存の知識ベースによるデータのラベル付け、修正の必要性を検討する必要があります。
+         #+begin_example
+         Our early results [20] indicate that, if we start to explicitly model the quality of each data source, then we can automatically identify the data sources that are most in need of enrichment, thus reducing the cost of data cleaning and acquisition.
+         -- quoted from page 4 line about 25
+         -- ref [20] is https://arxiv.org/pdf/1512.06474.pdf
+         (data enrichment (テキストを例にすると、特定のキーワードに対する値をそれぞれのテキストから取り出すこと?))
+         #+end_example
+    2. End-to-End な機械学習システム
+
+       機械学習システムをカプセル化してSQLや検索エンジンのように扱えるようにしたいと考えています。
+       - 大規模ストリームを用いた分類
+
+         ランキングや分類は多くのプロダクトで大量のデータを処理しなければならないという特徴があるため、これらをストリームで処理できるような機構を整備する必要があります。例えばストリーム検索エンジンのプロトタイプ実装として MacroBase engine を作成し、多くのドメインで用いられる特定の演算子の高速化を図りました。また非常に高価な機材を必要とするリアルタイム動画分析（ex. $0.5 のセンサー x n + $1200 のグラボ）のような分野に対して、ここで培われる技術や既存の技術を適用していきたいと考えています。
+
+       - パーソナライズされたモデル提案
+
+         機械学習モデルをプロダクトに適用するに当たり、そのプロダクトのデータに合わせたモデルチューニングが必要になります。私達はモデルへの入力のためのシンプルなインターフェースや、自動的なモデルチューニング、モデルのサービス化、監視、そしてモデルの再訓練のための end-to-end なプラットフォームを作ります。(この辺り Sony とか Microsoft が力を入れている分野だったはず)
+       - 推論と動作の組み合わせ
+
+         自動運転などの一部の例を除いて、モデルはあくまで推論を行なうのみで、意思決定を行なうのは人間を始めとする別の機関であることが一般的です。このためモデルの推論とそれらの機関とをつなげるための機構を作る必要があります。つまりアラートや通知といった機能と機械学習モデルとをつなげるための一連の開発環境を作りたいと考えています。
+       - SQLやグラフ、線形代数の統合
+
+         現在のSQLやグラフ、機械学習の機構はそれぞれの機構についてのみ最適化されているため、これらを共通して最適化できるようなエンジンが必要だと考えている。
+
+    3. 新たな機械学習のための基盤
+
+       コストパフォーマンスの良い訓練のための分散機構やハードウェア最適化、言語サポートを含んだ新たな開発環境の開発をしたいと考えています。（やめてほしい）
+       Tensorflow や Spark のような既存のフレームワークについて分散学習のための支援機構を用意したいそうです。（ただでさえTF2系は事故要因が多すぎるのでやめてほしい）
+* 達成目標と評価軸
+  軸は使いやすさで、詳細な評価軸としては、
+
+  1. データや特徴量抽出などを含んだ機械学習プロダクトの開発時間・費用
+  2. ハードウェアやその機械学習モデルの監視のための人的リソースを含めたプロダクトでのアプリケーションの実行時間・費用
+  3. エンドユーザに対する利益
+* 本プロジェクトが上手くいくであろう裏付け
+
+  DeepDiveや Snorkel MacroBase での成功例
+  DeepDive は人身売買の業者特定などの分野で活用された。
+  Snorkel は Google が Tensorflow に組み込んで成果を上げている。https://www.infoq.com/jp/news/2019/06/google-snorkel-drybell/
+    
+* 感想
+  DeepDiveを読んでいたので何となく何をしたいのかわかりました
+  
+* 関連して読んだ論文など
+  - DeepDive
+  - Deep Text Mining of Instagram Data Without Strong Supervision
+  https://arxiv.org/pdf/1909.10812.pdf
+
+  - Snorkel Tutorial
+    https://hazyresearch.github.io/snorkel/blog/june-2019-workshop.html
+    https://www.dropbox.com/sh/ipxmm6twu4p2qo1/AABUdQ0i0UOt46q11Ldgy6z7a/Day%202?dl=0&preview=05_SuperGLUE.pdf&subfolder_nav_tracking=1
+  - Snorkel DryBell
+    https://arxiv.org/pdf/1812.00417.pdf
+    きちんとテキスト分類としてパフォーマンスを計測していたんですが、実装がありませんでした。但し仕組みはわかりやすかったです。
+  - 機械学習を用いた日本語ゼロ代名詞照応関係の同定
+
+    Feature Extraction についてあまりめぼしい情報がなかったので日本語のゼロ主語問題についての論文を探していたところ、ラベリングのためのツールを作った、という論文を見ました。実験や結論などはあまりでしたが、本論文の導入の「機械学習は人手を用いるよりも効率的に解析規則を獲得できる」という部分に対して「人手のルールを導入した機械学習」という違いが面白いと思いました。
+
+  https://library.naist.jp/mylimedio/dllimedio/showpdf2.cgi/DLPDFR001793_PH1
+  - 用例や表層表現を用いた日本語文章中の指示語・代名詞・ゼロ代名詞の指示対象の推定
+
+    ちょうど Snorkel に組み合わせることができそうな例を見つけました。ただ今あるデータとどう結びつけるのかを考えています。
+  https://www.jstage.jst.go.jp/article/jnlp1994/4/1/4_1_87/_pdf/-char/ja
+
+* よくわからないところ
+  Generative Model の用語の用い方がちょっと混乱します。
+  例えば Deep Text Mining of Instagram Data Without Strong Supervision での Generative Model は、弱分類器からの出力をまとめた Matrix を入力として、 「クラス分類モデルのための潜在表現」を出力とするモデル (page 4 1st column) で、潜在表現を生成するとはどういうことなのか想像できていません。
+  
+  またこのDAWN の性能は入力したラベリングに依存するため（入力したラベルを確率的なラベルとして推論する機構）、論文になっているものの実際にどのくらいの精度なのかが不安な気がします。
