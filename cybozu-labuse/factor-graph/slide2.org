@@ -40,5 +40,6 @@ Gibbs Samplingがちらっと見えたけど実はまだまだ先は長かった
 * 因子グラフ(factor graph)
   因子グラフは無向グラフモデルの別の描き方です。以下の3つの図を見てください。
   [[../img/factor_diagrams.png]]
+
   
   

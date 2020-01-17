@@ -1,0 +1,56 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:t arch:headline author:t
+#+options: broken-links:nil c:nil creator:nil d:(not "LOGBOOK") date:t e:t
+#+options: email:nil f:t inline:t num:t p:nil pri:nil prop:nil stat:t tags:t
+#+options: tasks:t tex:t timestamp:t title:t toc:t todo:t |:t
+#+title: 8月中の進捗
+#+date: <2019-09-09 月>
+#+author: meguru
+#+email: meguru@meguru-pc
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 26.3 (Org mode 9.2.4)
+
+1. Tensorflow2.0についての勉強をしていました。
+   - 比較手法として使えるTransformerなどのモデルを実装していました
+         公式チュートリアルが(動くかはともかく)充実していました
+   - Glowを比較的簡単に実装できるライブラリ tensorflow-probability について勉強していました
+         と思っていましたが、内部が tensorflow 1.13.0 系で開発しているのに requirement が tensorflow 2.0.0rc0 なのでわけのわからないことになっています。
+          
+2. niconico データセットの解析をしていました。
+
+   1. 解析対象
+      niconico 大百科や pixiv 大百科のような辞典を想定します
+      → HTMLデータの中でも比較的に構造化されていると考えられるため
+      → Wikipediaに比べて若者向けに作れる？
+
+   2. HTML 解析がしんどいです
+      p タグや a タグなんかを取り出すのが大変
+      → beautiful soup とか使わないの？
+      - → 構造化情報をできるだけ残して情報抽出をしたいため、できるだけ *残せるように* 処理したい
+
+   3. やや進捗を生んでいます。今はゼロ主語補完についての実験をしています。
+      https://drive.google.com/drive/folders/1YKow6eF8c-dshwioRPeMLYEpJ-CwVuEW?usp=sharing
+      タイトル x の y という項目のテキストで、主語が欠けていれば 「x の y は」というような主語補完を行う
+      指示語がある場合は既存のツール (COTOHA API) などを活用しながら実験しないといけない…      
+      
+3. OpenAI の Glow の再現実験をしようとしていました。
+    上手く行っていません
+
+4. データセットの調査
+   - 非並行なデータセットは見つけることができていません。
+     非並行なデータセット : http://npcmj.ninjal.ac.jp/
+     すごく面白そうですが、もう少し見たいです : http://npcmj.ninjal.ac.jp/interfaces/cgi-bin/index.sh?db=npcmj&lang=jp
+   - 並行なデータセットはツールを使うことや、方言のデータセットを見つけるなどしました。
+       もんじろう  : http://monjiro.net/
+       日本語方言データセット : https://www.ninjal.ac.jp/database/subject/diversity/
+       - まえがき
+     #+begin_example
+     ○研究の経過
+　この研究は，昭和49年度から同51年度にかけて行った。
+　昭和49年度は準備期間とし，全国47都道府県で各種の実験的録音・文字化を行い，その結果に基づいて，次年度以降の計画を立案した。
+　50年度は，全国的視野のもとに重点地域を定め，23の府県から各１地点を選定して，老年層の男性と同女性との対話，もしくは，男女を含む老年層話者３人の会話を録音し，文字化することとした。
+　51年度は収録地点を４地点減らし，19の府県について，原則として50年度と同一の地点で，（ａ）目上・目下の関係にある老年層の男性２人による対話，（ｂ）老年層の男性と若年層の男性との対話，もしくは，両者を含む３人の話者の会話，（ｃ）場面設定の会話，の３項目についての録音・文字化を行い，収録可能な地域では，付録として，民話の収録・文字化も実施することとした。（ｃ）については，「品物を借りる」「（旅行などに）誘う」「新築の祝いを述べる」「隣家の主人の所在をたずねる」「けんかをする」「道で知人に会う」「道で目上の知人に会う」「うわさ話をする」の八場面を，全地点共通の場面として設定した。
+　以上の録音・文字化資料は，すべて国立国語研究所で整理し，保管しているが，当研究所では，このうち，50・51両年度分について逐次刊行していく予定である。今回は，50年度に収録・文字化を行った老年層話者による談話資料のうち，「山形県西村山郡河北町谷地」「群馬県利根郡利根村大字追貝」「長野県上伊那郡中川村大字葛島」の３地点分について，オフセットにより複製印行する。
+     #+end_example
+     
