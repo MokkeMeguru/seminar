@@ -263,3 +263,6 @@ TSWLatexianTemp*
 # my settings
 *ltximg/
 /gaugan/*.kra
+*.kra
+*.png~
+*.kra~
